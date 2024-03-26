@@ -1,0 +1,123 @@
+diff -u --recursive a/bin/make-include.pl.in b/bin/make-include.pl.in
+--- a/bin/make-include.pl.in	2009-06-11 03:32:45.000000000 +0200
++++ b/bin/make-include.pl.in	2009-06-11 03:32:27.000000000 +0200
+@@ -830,7 +830,8 @@
+ 	$inc_slha_prt .=
+ 	    "  call handle ($particle)\n";
+ 	$inc_slha_def_mass .=
+-	    "  real(kind=default) :: $mass{$particle}\n";
++	    "  real(kind=default) :: $mass{$particle}\n"
++			unless ($inc_slha_def_mass =~ m/:: $mass{$particle}\n/);
+ 	$inc_slha_set_mass .=
+ 	    "  case ($particle);  mass%$mass{$particle} = value\n";
+ 	$inc_slha_get_mass .=
+@@ -844,7 +845,8 @@
+ 	$inc_prt_widths .=
+ 	    "  case ($particle);  width = par%$width{$particle}\n";
+ 	$inc_slha_def_decay .=
+-	    "  real(kind=default) :: $width{$particle}\n";
++	    "  real(kind=default) :: $width{$particle}\n"
++			unless ($inc_slha_def_decay =~ m/:: $width{$particle}\n/);
+ 	$inc_slha_set_decay .=
+ 	    "  case ($particle);  decay%$width{$particle} = value\n";
+ 	$inc_slha_get_decay .=
+diff -u --recursive a/omega-src/insert-color.pl.in b/omega-src/insert-color.pl.in
+--- a/omega-src/insert-color.pl.in	2009-06-11 03:33:51.000000000 +0200
++++ b/omega-src/insert-color.pl.in	2009-06-11 03:36:35.000000000 +0200
+@@ -1089,7 +1089,7 @@
+ 
+     foreach $prt (@prt) {
+ 	if ($prt =~ /^($col_pattern)$/) {
+-	    $prt =~ m/^\w+\/(\d)\/(\d)?$/;
++	    $prt =~ m/^[\w\+\-~]+\/(\d)\/(\d)?$/;
+ #	    $prt =~ m/^\w+\/(\d)(\d)?$/;
+ 	    $col = $1;
+ 	    if ($col_index{$col}) {
+@@ -1101,9 +1101,9 @@
+     }
+     foreach $prt (@prt) {
+ 	if ($prt =~ /^($col_pattern|$acl_pattern)$/) {
+-	    $prt =~ s/^(\w+\/)(\d)(\/)$/$1$col_index{$2}\//;
+-	    $prt =~ s/^(\w+\/\/)(\d)$/$1$col_index{$2}/;
+-	    $prt =~ s/^(\w+\/)(\d)(\/)(\d)$/$1$col_index{$2}\/$col_index{$4}/;
++	    $prt =~ s/^([\w\+\-~]+\/)(\d)(\/)$/$1$col_index{$2}\//;
++	    $prt =~ s/^([\w\+\-~]+\/\/)(\d)$/$1$col_index{$2}/;
++	    $prt =~ s/^([\w\+\-~]+\/)(\d)(\/)(\d)$/$1$col_index{$2}\/$col_index{$4}/;
+ ### OLD VERSION FOR EXPLICIT SCRIPTING 
+ ###	if ($prt =~ /^($col_pattern|$acl_pattern)$/) {
+ ###	    $prt =~ s/^(\w+\/)(\d)$/$1$col_index{$2}/;
+@@ -1127,13 +1127,13 @@
+ 
+     foreach $prt (@prt) {
+ 	if ($prt =~ /^($col_pattern)$/ and $prt =~ /^($acl_pattern)$/) {
+-	    $prt =~ /^\w+\/(\d)\/(\d)$/;
++	    $prt =~ /^[\w\+\-~]+\/(\d)\/(\d)$/;
+ 	    push @col, $1;  push @acl, $2;
+ 	} elsif ($prt =~ /^($col_pattern)$/) {
+-	    $prt =~ /^\w+\/(\d)\/$/;
++	    $prt =~ /^[\w\+\-~]+\/(\d)\/$/;
+ 	    push @col, $1;  push @acl, 0;
+ 	} elsif ($prt =~ /^($acl_pattern)$/) {
+-	    $prt =~ /^\w+\/\/(\d)$/;
++	    $prt =~ /^[\w\+\-~]+\/\/(\d)$/;
+ 	    push @acl, $1;  push @col, 0;
+ 	} else {
+ 	    push @col, 0;  push @acl, 0;
+diff -ur a/bin/make-proc.pl.in b/bin/make-proc.pl.in
+--- a/bin/make-proc.pl.in	2009-09-05 23:41:02.000000000 +0200
++++ b/bin/make-proc.pl.in	2009-09-05 23:41:12.000000000 +0200
+@@ -117,6 +117,7 @@
+     ($omegabin_col = $omegabin) =~ s/\.opt/_Col.opt/;
+     if (-x "$omegabin" or -x "$omegabin_col") {
+ 	$omega_parameters = "$mdldir/parameters.$model.omega.f90";
++	$omega_parameters_stem = "$mdldir/parameters.$model.omega";
+ 	unless (-f $omega_parameters) {
+ 	    print "$0: Can\'t find $omega_parameters -- disabling omega.\n";
+ 	    $omega = "no";
+@@ -170,9 +171,22 @@
+ # Copy the model- and method-dependent files
+ unless ($keep_model) {
+     if ($omega ne "no") {
+-	$stat = system ("cp", $omega_parameters,
+-			"results/omega_parameters_whizard.f90");
+-	$stat==0 or die "Can\'t copy $omega_parameters into results directory";
++        $omega_parameters_files = `ls $omega_parameters_stem*`;
++        @omega_parameters_files = split /\n/, $omega_parameters_files;
++        $omega_parameters_files = "";
++        foreach (@omega_parameters_files) {
++            my $target;
++            if (m/.*global.f90/)
++                {$target = "omega_parameters_whizard_global.f90"}
++            elsif (m/.*cpl(\d+).f90/)
++                {$target = "omega_parameters_whizard_cpl$1.f90"}
++            elsif (m/.*local.f90/)
++                {$target = "omega_parameters_whizard_local.f90"}
++            else {$target = "omega_parameters_whizard.f90"};
++            $omega_parameters_files .= "$target ";
++            system ("cp", $_, "results/$target") == 0 or die
++                "Can\'t copy $_ into the results directory";
++        }
+     }
+ }
+ 
+@@ -1506,7 +1520,7 @@
+ 
+     # List files
+     $src = "parameters.f90 file_utils.f90 process_interface.f90 ";
+-    if ($omega ne "no") { $src .= "omega_parameters_whizard.f90 "; }
++    if ($omega ne "no") { $src .= "$omega_parameters_files"; }
+     foreach $ext(sort keys %ext) {
+ 	$src .= "$ext*.f90 ";
+     }
+diff -ur a/bin/make-include.pl.in b/bin/make-include.pl.in
+--- a/bin/make-include.pl.in	2010-01-12 12:30:34.000000000 +0100
++++ b/bin/make-include.pl.in	2010-01-12 12:30:42.000000000 +0100
+@@ -50,7 +50,7 @@
+ }
+ 
+ # The allowed lengths for parameter/particle strings
+-$len_parameter = 8;
++$len_parameter = 20;
+ $len_value = 20;
+ $len_particle = 20;
+ $len_chep_name = 6;

@@ -1,0 +1,32 @@
+
+(***************** This is a template model file for FeynRules ***********)
+
+
+(********** Index definition *********)
+
+IndexRange[ Index[Generation] ] = Range[3]
+
+IndexRange[ Index[Colour] ] = NoUnfold[Range[3]]
+
+
+IndexFormat[Colour, i]
+
+IndexFormat[Generation, f]
+
+(***** Parameter list ******)
+
+M$Parameters = {
+
+}
+
+(***** Gauge group list ******)
+
+M$GaugeGroups = {
+}
+
+(***** Particle classes list ******)
+
+M$ClassesDescription = {
+
+}
+

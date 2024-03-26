@@ -1,0 +1,56 @@
+diff -ur a/src/.depend b/src/.depend
+--- a/src/.depend	2009-07-03 17:14:48.000000000 +0200
++++ b/src/.depend	2009-07-03 17:15:32.000000000 +0200
+@@ -318,4 +318,17 @@
+ f90_SM_clones.cmo: targets.cmi omega.cmi models.cmi fusion.cmi 
+ f90_SM_clones.cmx: targets.cmx omega.cmx models.cmx fusion.cmx 
+ count.cmo: topology.cmi thoList.cmi combinatorics.cmi 
+-count.cmx: topology.cmx thoList.cmx combinatorics.cmx 
++count.cmx: topology.cmx thoList.cmx combinatorics.cmx
++
++# FeynRules preliminary
++$(FR_MODULES:.ml=.cmi) : model.cmi coupling.cmi
++
++$(FR_MODULES:.ml=.cmo) : thoList.cmi rCS.cmi product.cmi options.cmi model.cmi \
++    coupling.cmi combinatorics.cmi color.cmi $(FR_MODULES:.ml=.cmi)
++
++$(FR_MODULES:.ml=.cmx) : thoList.cmx rCS.cmx product.cmx options.cmx model.cmi \
++    coupling.cmi combinatorics.cmx color.cmx $(FR_MODULES:.ml=.cmi)
++
++$(FR_BINARIES:.ml=.cmo) : targets.cmo omega.cmo $(FR_MODULES:.ml=.cmo) fusion.cmo colorize.cmo
++
++$(FR_BINARIES:.ml=.cmx) : targets.cmx omega.cmx $(FR_MODULES:.ml=.cmx) fusion.cmx colorize.cmx
+diff -ur a/src/Makefile.src b/src/Makefile.src
+--- a/src/Makefile.src	2009-07-03 17:14:48.000000000 +0200
++++ b/src/Makefile.src	2009-07-03 17:17:28.000000000 +0200
+@@ -38,6 +38,10 @@
+ MODEL_MODULES = 
+ endif
+ 
++# Feynrules preliminary
++FR_MODULES = $(shell find . -name 'fr*.ml')
++FR_BINARIES = $(shell find . -name 'f90_fr*.ml')
++
+ MODULES = \
+ 	pmap.ml thoList.ml thoArray.ml thoString.ml rCS.ml \
+ 	cache.ml trie.ml lapack.ml linalg.ml \
+@@ -51,7 +55,8 @@
+ 	oVM.ml whizard.ml \
+ 	comphep_syntax.ml comphep_lexer.mll comphep_parser.mly comphep.ml \
+ 	$(MODEL_MODULES) colorize.ml \
+-	omega_syntax.ml omega_lexer.mll omega_parser.mly omega.ml
++	omega_syntax.ml omega_lexer.mll omega_parser.mly omega.ml \
++	$(FR_MODULES)
+ 
+ GUI_MODULES = \
+ 	thoGButton.ml thoGWindow.ml thoGMenu.ml thoGDraw.ml
+@@ -80,7 +85,8 @@
+ 	f90_Simplest f90_Simplest_univ \
+ 	f90_Xdim f90_GravTest \
+ 	f90_SM_km f90_UED f90_Zprime \
+-	f90_Template
++	f90_Template \
++	$(FR_BINARIES:.ml=)
+  
+ # Colorized for WHiZard
+ PROGRAMS_released += \

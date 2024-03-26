@@ -1,0 +1,38 @@
+# $Id: Makefile.whizard.in 3435 2011-07-24 22:20:34Z cnspeckn $
+
+prefix = @prefix@
+install = @INSTALL@
+fc = @FC@
+fcflags = @FCFLAGS@
+fc_modext = @FC_MODEXT@
+libtool = @LIBTOOL@
+libpath = @WHIZARD_LIBPATH@
+datapath = @WHIZARD_DATAPATH@
+
+moddir = $(libpath)/../mod/whizard
+modeldir = $(datapath)/models
+
+default: all
+
+include Makefile.src
+
+all: $(libraries) $(models)
+
+install: all
+	$(install) -d -m 755 $(prefix)/share/whizard/models
+	$(install) -d -m 755 $(prefix)/lib/whizard/models
+	$(install) -d -m 755 $(prefix)/lib/whizard/mod/models
+	$(install) -m 644 $(models) $(prefix)/share/whizard/models
+	$(install) -m 644 $(modules) $(prefix)/lib/whizard/mod/models
+	$(libtool) --tag=FC --mode=install $(install) -m 644 $(libraries) \
+		$(prefix)/lib/whizard/models
+	$(libtool) --tag=FC --mode=finish $(prefix)/lib/whizard/models
+
+clean:
+	-rm -fr *.mod *.lo .libs *.o *.la
+
+%.lo: %.f90
+	$(libtool) --tag=FC --mode=compile $(fc) -prefer-pic -static -c \
+		-I $(moddir) $(fcflags) $<
+
+.PHONY: all install clean default
