@@ -1,12 +1,12 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(* PyR@TE Interface  *)
+(* FeynRules - PyR@TE Interface*)
 
 
 (* ::Text:: *)
 (*Author : Lohan Sartore*)
-(*Version : 1.0 / Feb. 2024  *)
+(*Version : 1.0  --  March 2024*)
 
 
 (* ::Section::Closed:: *)
@@ -33,20 +33,20 @@ Protect[$MassDiag]$;
 (*Useful functions*)
 
 
-Options[LoadPaths]={Muted->False};
+Options[LoadPaths] = {Muted->False};
 
 
 LoadPaths[PR$Path_,OptionsPattern[]] := Block[{configFileExists, s, invalid=False},
-    (* Has the interface been muted by the user? *)
-    If[FileExistsQ[FileNameJoin[{DirectoryName[$InputFileName], "FRPR_muted"}]], Return[], PR$Enabled=True];
+	(* Has the interface been muted by the user? *)
+	If[FileExistsQ[FileNameJoin[{DirectoryName[$InputFileName], "FRPR_muted"}]], Return[], PR$Enabled=True];
 
-    (* Is the config file created ? *)
+	(* Is the config file created ? *)
 	configFileExists = FileExistsQ[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]];
 	If[!configFileExists,
 		CreateConfigFile["", "", ""];
 	];
 	Get[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]];
-	
+
 	If[!configFileExists || AllTrue[{PR$PythonPath, PR$PyratePath, PR$PyLiePath}, # == ""&],
 		Print[StringRepeat["-", 70]];
 		Print[Style["The FeynRules-PyR@TE interface cannot be loaded.",Darker[Orange]]];
@@ -61,13 +61,13 @@ LoadPaths[PR$Path_,OptionsPattern[]] := Block[{configFileExists, s, invalid=Fals
 		Print[Row[{"  ** \t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
 		Print[StringRepeat["-", 70]];
 		Return[];
-		,
+	,
 		PR$Config = True;
 	];
 	
 	If[PR$PythonPath == "" || !FileExistsQ[PR$PythonPath],
 		invalid = True;
-		Print[Style["Error: Invalid Python executable path. Please set it correctly before going on.",Red]];
+		Print[Style["Error: Invalid Python executable path. Please set it correctly before going on.", Red]];
 	];
 	If[PR$PyratePath == "" || !FileExistsQ[PR$PyratePath],
 		invalid = True;
@@ -76,18 +76,22 @@ LoadPaths[PR$Path_,OptionsPattern[]] := Block[{configFileExists, s, invalid=Fals
 	
 	(* Cleaning the mess if problems *)
 	If[invalid,
-	  Print[Style["Please correctly setup the FeynRules-PyRATE interface:", Red]];
-	  Print[Style["\t PR$SetPaths[Python->[pythonPath], PyRATE->[PyR@TE 3 Folder]];",Darker[Green]]];
-	  DeleteFile[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]]; 
-	  PR$Config = False;
-	  Return[],
-	  If[!OptionValue[Muted],
-	    Print[Style["The FeynRules-PyR@TE interface has been loaded.", Darker[Orange]]];
-	    Print[Style["Please cite arXiv:2107.NNNNN if using it.", Darker[Orange]]];
-	  ];
-	  If[$Output =!= {}, CheckDependencies[]];
+		Print[Style["Please correctly setup the FeynRules-PyRATE interface:", Red]];
+		Print[Style["\t PR$SetPaths[Python->[pythonPath], PyRATE->[PyR@TE 3 Folder]];",Darker[Green]]];
+		DeleteFile[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]]; 
+		PR$Config = False;
+		Return[];
+	,
+		If[!OptionValue[Muted],
+			Print[Style["The FeynRules-PyR@TE interface has been loaded.", Darker[Orange]]];
+			Print[Style["Please cite arXiv:2107.NNNNN if using it.", Darker[Orange]]];
+		];
+		
+		If[$Output =!= {},
+			CheckDependencies[];
+		];
 	];
-]
+];
 
 
 CreateConfigFile[python_, pyrate_, pylie_] := Block[{s},
@@ -98,19 +102,20 @@ CreateConfigFile[python_, pyrate_, pylie_] := Block[{s},
 	s = s <> "PR$PythonPath = \"" <> python <> "\";\n";
 	s = s <> "PR$PyratePath = \"" <> pyrate <> "\";\n";
 	s = s <> "PR$PyLiePath = \"" <> pylie <> "\"\n";
-	
-	WriteString[FileNameJoin[{PR$Path, "PyRATE", "config.m"}], s];	
+
+	WriteString[FileNameJoin[{PR$Path, "PyRATE", "config.m"}], s];
+	Close[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]];
 ]
 
 
 Options[PR$SetPaths] = {Python->"", PyRATE->""};
 PR$SetPaths[OptionsPattern[]] := Block[{python, pyrate},
     (* Checking whether the interface is disabled *)
-    If[!PR$Enabled,
-      Print["Please first enable the FeynRules-PyR@TE interface:"];
-      Print[Row[{"  \t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
-      Return[];
-     ];
+	If[!PR$Enabled,
+		Print["Please first enable the FeynRules-PyR@TE interface:"];
+		Print[Row[{"  \t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
+		Return[];
+	];
 
 	If[OptionValue[Python] != "",
 		python = OptionValue[Python];
@@ -2902,7 +2907,7 @@ MassPositionFromPDG[pdg_] := Block[{res},
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Write the files*)
 
 
@@ -2971,47 +2976,47 @@ Options[DefineParameters]={DiagMass->False};
 
 
 DefineParameters[OptionsPattern[]]:=Block[{def,blockdefined,blockrule,mixingslist,parameterslist,hppstream,cppstream,stream,blocklist},
-  (*Initialization*)
-  (*If both block and value are provided, only block is kept*)
-  def=#/.Equal[par_,List[rule1___,Rule[BlockName,block_],rule3___,Rule[toto_?(#===Definitions||#===Value&),value_],rule5___]]:>Equal[par,List[rule1,Rule[BlockName,block],rule3,rule5]]&/@M$Parameters;
- (*Only keep relevant information*)
-  def=#//.Equal[a__,List[opt1___,Rule[name_?(!MemberQ[{BlockName,OrderBlock,Definitions,Value,Indices},#]&),value_],opt3___]]:>Equal[a,List[opt1,opt3]] &/@def;
-  (*Do not keep the mass matrices*)
-  (*It is important to note here that a mixing matrix appearing in both M$MixingsDescription AND MR$Parameters is supposed
-    to be known and provided by the user. It will be thus treated as a known parameter *)
-  mixingslist=Flatten[FilterRules[M$MixingsDescription[[All,2]],MixingMatrix]/.{Rule[_,a_]:>a,a_?(#===_&):>{}}];
-  mixingslist=DeleteCases[mixingslist,a_?(MemberQ[Intersection[mixingslist,MR$Parameters[[All,1]]],#]&)];
-  mixingslist=Flatten[List[#,ToExpression["R"<>ToString[#]],ToExpression["I"<>ToString[#]]]&/@mixingslist];
-  def=DeleteCases[def,Equal[a_?(MemberQ[mixingslist,#]&),def__]];
-  def=#/.List[list_?(ListQ[#]&),list2___]:>Sequence@@List[list,list2]&/@(DefineParam/@def);
-  (*Add parameters descriptions if any*)
-  def=Join[#,{GetParamDescription[#[[1]]]}]&/@def;
-  
-  def=Block[{fullName = ToExpression@StringReplace[ToString[#[[1]]], {"[" -> "", "]" -> "", ", " -> "x"}]},
-       If[MemberQ[PR$allExternals, fullName], Append[#, Position[PR$allExternals, fullName][[1,1]]], #]
-      ]&/@def;
+	(*Initialization*)
+	(*If both block and value are provided, only block is kept*)
+	def=#/.Equal[par_,List[rule1___,Rule[BlockName,block_],rule3___,Rule[toto_?(#===Definitions||#===Value&),value_],rule5___]]:>Equal[par,List[rule1,Rule[BlockName,block],rule3,rule5]]&/@M$Parameters;
+	(*Only keep relevant information*)
+	def=#//.Equal[a__,List[opt1___,Rule[name_?(!MemberQ[{BlockName,OrderBlock,Definitions,Value,Indices},#]&),value_],opt3___]]:>Equal[a,List[opt1,opt3]] &/@def;
+	(*Do not keep the mass matrices*)
+	(*It is important to note here that a mixing matrix appearing in both M$MixingsDescription AND MR$Parameters is supposed
+	  to be known and provided by the user. It will be thus treated as a known parameter *)
+	mixingslist=Flatten[FilterRules[M$MixingsDescription[[All,2]],MixingMatrix]/.{Rule[_,a_]:>a,a_?(#===_&):>{}}];
+	mixingslist=DeleteCases[mixingslist,a_?(MemberQ[Intersection[mixingslist,MR$Parameters[[All,1]]],#]&)];
+	mixingslist=Flatten[List[#,ToExpression["R"<>ToString[#]],ToExpression["I"<>ToString[#]]]&/@mixingslist];
+	def=DeleteCases[def,Equal[a_?(MemberQ[mixingslist,#]&),def__]];
+	def=#/.List[list_?(ListQ[#]&),list2___]:>Sequence@@List[list,list2]&/@(DefineParam/@def);
+	(*Add parameters descriptions if any*)
+	def=Join[#,{GetParamDescription[#[[1]]]}]&/@def;
 
-  (*Checking definitions*)
-  CheckDefinitions[def];
-  
-  (*for parameters defined in a paramcard.dat*)
-  blockdefined=Union[Cases[def,List[_,_,_,_,_]]];
-  blocklist=Union[blockdefined/.List[par_,blockname_,ind_,typ_,des_]:>blockname];
-  blocklist=DefineBlocks[blockdefined,#]&/@blocklist;
-  blockrule=Rule[WordBoundary~~ToString[#[[1]]]~~WordBoundary, ToString[#[[2]]]]&/@blocklist;
- (*Transform the definitions into strings*)
-  def=DefinitionsToStrings[#]&/@def;
+	def=Block[{fullName = ToExpression@StringReplace[ToString[#[[1]]], {"[" -> "", "]" -> "", ", " -> "x"}]},
+		If[MemberQ[PR$allExternals, fullName], Append[#, Position[PR$allExternals, fullName][[1,1]]], #]
+	]& /@ def;
 
-  (* Store the parameters names to build the destructor later *)
-  PR$CppParams = def[[All,1]];
+	(*Checking definitions*)
+	CheckDefinitions[def];
   
-  (*Create and open files for writing*)
-  hppstream=OpenAppend["inc/Parameters.hpp"];
-  cppstream=OpenAppend["src/Parameters.cpp"];
-  stream={hppstream,cppstream};
+	(*for parameters defined in a paramcard.dat*)
+	blockdefined=Union[Cases[def,List[_,_,_,_,_]]];
+	blocklist=Union[blockdefined/.List[par_,blockname_,ind_,typ_,des_]:>blockname];
+	blocklist=DefineBlocks[blockdefined,#]&/@blocklist;
+	blockrule=Rule[WordBoundary~~ToString[#[[1]]]~~WordBoundary, ToString[#[[2]]]]&/@blocklist;
+	(*Transform the definitions into strings*)
+	def=DefinitionsToStrings[#]&/@def;
+
+	(* Store the parameters names to build the destructor later *)
+	PR$CppParams = def[[All,1]];
   
-  (*The .hpp file*)
-  WriteString[hppstream,"#ifndef PARAMETERS_HPP 
+	(*Create and open files for writing*)
+	hppstream=OpenAppend["inc/Parameters.hpp"];
+	cppstream=OpenAppend["src/Parameters.cpp"];
+	stream={hppstream,cppstream};
+  
+	(*The .hpp file*)
+	WriteString[hppstream, "#ifndef PARAMETERS_HPP 
 #define PARAMETERS_HPP 
 
 #include \"headers.hpp\" 
@@ -3032,32 +3037,43 @@ class Parameters
 
 "];
 
-  WriteString[hppstream,"        //Declaration of the parameters\n"];
-  If[#[[-2]]==="Complex",
-    WriteString[hppstream,"        CPar* "<> First[#] <>";  \n"]
-  ,
-    WriteString[hppstream,"        RPar* "<> First[#]<>";   \n"]
-  ]&/@ def;
+	WriteString[hppstream,"        //Declaration of the parameters\n"];
+	If[#[[-2]]==="Complex",
+		WriteString[hppstream,"        CPar* "<> First[#] <>";  \n"]
+	,
+		WriteString[hppstream,"        RPar* "<> First[#]<>";   \n"]
+	]& /@ def;
   
-  (*The .cpp file*)
-  WriteString[cppstream,"#include \"Parameters.hpp\"\n\n"];
-  WriteString[cppstream,"void Parameters::init(double* externals)\n{\n"];
+	(*The .cpp file*)
+	WriteString[cppstream,"#include \"Parameters.hpp\"\n\n"];
+	WriteString[cppstream,"void Parameters::init(double* externals)\n{\n"];
   
-  (*Declare every parameter*)
-  WriteString[cppstream,"    //Initialisation of the parameters\n"];
+	(*Declare every parameter*)
+	WriteString[cppstream,"    //Initialisation of the parameters\n"];
   
-  Which[Length[#]===6, WriteString[cppstream,"    "<>#[[1]]<>" = new RPar(externals["<>ToString[ToExpression[#[[-1]]]-1]<>"]);\n"],
-        Length[#]===4 && #[[-2]]=="Complex", WriteString[cppstream,"    "<>#[[1]]<>" = new CPar("<>#[[2]]<>");\n"],
-        Length[#]===4 && #[[-2]]==="Real",  WriteString[cppstream,"    "<>#[[1]]<>" = new RPar("<>#[[2]]<>");\n"]]&/@def;
+	Which[
+		Length[#]===6,
+			WriteString[cppstream,"    "<>#[[1]]<>" = new RPar(externals["<>ToString[ToExpression[#[[-1]]]-1]<>"]);\n"],
+		Length[#]===4 && #[[-2]]=="Complex",
+			WriteString[cppstream,"    "<>#[[1]]<>" = new CPar("<>#[[2]]<>");\n"],
+		Length[#]===4 && #[[-2]]==="Real",
+			WriteString[cppstream,"    "<>#[[1]]<>" = new RPar("<>#[[2]]<>");\n"]
+	]& /@ def;
         
-  WriteString[cppstream,"\n"];
+	WriteString[cppstream,"\n"];
 
-  (*If these files are created for the mass matrices diagonalization routine, than output a list of the parameters*)
-  If[OptionValue[DiagMass], 
-    Close[#]&/@stream,
-    WriteString[hppstream,"};\n"];WriteString[hppstream,"#endif"];Close[hppstream];
-    WriteString[cppstream,"};\n"];Close[cppstream];];
-  Print["Parameters.cpp and Parameters.hpp output is finished.\n They have been stored in " <> Directory[]];
+	(*If these files are created for the mass matrices diagonalization routine, than output a list of the parameters*)
+	If[OptionValue[DiagMass], 
+		Close[#]&/@stream;
+	,
+		WriteString[hppstream,"};\n"];
+		WriteString[hppstream,"#endif"];
+		Close[hppstream];
+		WriteString[cppstream,"};\n"];
+		Close[cppstream];
+	];
+	
+	Print["Parameters.cpp and Parameters.hpp output is finished.\n They have been stored in " <> Directory[]];
 ];
 
 
@@ -3073,164 +3089,175 @@ class Parameters
 
 
 CalculatePDGFLR[field_]:=Block[{resu},
-  resu=PartPDG[field];
-  If[Not[FreeQ[resu,PartPDG]], resu=PartPDG[ClassMemberList[field/.fi_[__]:>fi][[field/.fi_[inds1___,a_?NumericQ,inds2___] :>a]]]];
-  If[Not[FreeQ[resu,PartPDG]], Print["Error with the PDG identification ("<>ToString[InputForm[field]]<>"). Please contact the FeynRules authors."]];
-  Return[resu];
+	resu=PartPDG[field];
+	If[Not[FreeQ[resu,PartPDG]], resu=PartPDG[ClassMemberList[field/.fi_[__]:>fi][[field/.fi_[inds1___,a_?NumericQ,inds2___] :>a]]]];
+	If[Not[FreeQ[resu,PartPDG]], Print["Error with the PDG identification ("<>ToString[InputForm[field]]<>"). Please contact the FeynRules authors."]];
+	Return[resu];
 ];
 
 
 CalculatePDGWeyl[field_]:=Block[{Ferm4,inds},
-  Ferm4=To4Components[field/.fi_[__]:>fi];
-  inds=List@@field;
-  Return[CalculatePDGFLR[Ferm4[Sequence@@inds]]];
+	Ferm4=To4Components[field/.fi_[__]:>fi];
+	inds=List@@field;
+	Return[CalculatePDGFLR[Ferm4[Sequence@@inds]]];
 ];
 
 
 DefineMassMatrices[]:=Block[{tmpdef,cppstream,hppstream,mainstream,matrixelement,matrixsymbol,blockname,massmatrix,pdgids,massbasis,liste, AuxBlockStrings},
- tmpdef=Which[
-    (*Dirac Fermions*)
-    Type[#]==="FLR" || Type[#]==="F4",
-    Print["MAT = ", #];
-      matrixsymbol=ToString[MatrixSymbol[#,"L"]];
-      blockname=ToString/@List[BlockName[#,"L"],BlockName[#,"R"]];
-      massmatrix=DefinitionsToStrings/@((Expand[List[MassMatrix[#] . ConjugateTranspose[MassMatrix[#]], ConjugateTranspose[MassMatrix[#]] . MassMatrix[#] ]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num);
-      pdgids=ToString/@(Sort/@List[CalculatePDGFLR/@MassBasis[#],CalculatePDGFLR/@MassBasis[#]]); 
-      massbasis=ToString/@(MassBasis[#]/.part_[n_Integer,_]:>part[n]);
-      liste=List[matrixsymbol,blockname,ToString[Length[massbasis]],massmatrix,pdgids,massbasis],
+	tmpdef = Which[
+		(*Dirac Fermions*)
+		Type[#]==="FLR" || Type[#]==="F4",
+			matrixsymbol=ToString[MatrixSymbol[#,"L"]];
+			blockname=ToString/@List[BlockName[#,"L"],BlockName[#,"R"]];
+			massmatrix=DefinitionsToStrings/@((Expand[List[MassMatrix[#] . ConjugateTranspose[MassMatrix[#]], ConjugateTranspose[MassMatrix[#]] . MassMatrix[#] ]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num);
+			pdgids=ToString/@(Sort/@List[CalculatePDGFLR/@MassBasis[#],CalculatePDGFLR/@MassBasis[#]]); 
+			massbasis=ToString/@(MassBasis[#]/.part_[n_Integer,_]:>part[n]);
+			liste=List[matrixsymbol,blockname,ToString[Length[massbasis]],massmatrix,pdgids,massbasis],
 
-(*Charged Weyls*)
-   Type[#]==="CWeyl",
-      matrixsymbol=ToString/@(List[MatrixSymbol[#][[1]],MatrixSymbol[#][[2]]]);
-      blockname =ToString/@List[BlockName[#][[1]],BlockName[#][[2]]];
-      massmatrix=DefinitionsToStrings/@((Expand[List[MassMatrix[#] . ConjugateTranspose[MassMatrix[#]],ConjugateTranspose[MassMatrix[#]] . MassMatrix[#]]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num);
-      pdgids=ToString/@(List[Sort[CalculatePDGWeyl/@MassBasis[#][[1]]],-Sort[CalculatePDGWeyl/@MassBasis[#][[2]]]]);
-      massbasis=List[ToString/@(MassBasis[#][[1]]/.par_[n_Integer,_]:>par[n]),ToString/@(MassBasis[#][[2]]/.par_[n_Integer,_]:>par[n])];
-      liste=List[matrixsymbol,blockname,ToString/@(Length/@massbasis),massmatrix,pdgids,massbasis];
-      Sequence@@List[liste[[All,1]],liste[[All,2]]],
-    (*Scalars and pseudo scalars*)
-    Type[#]==="SPS",
-      matrixsymbol=ToString/@(List[MatrixSymbol[#,"S"],MatrixSymbol[#,"PS"]]);
-      blockname=ToString/@List[BlockName[#,"S"],BlockName[#,"PS"]];
-      massmatrix=DefinitionsToStrings/@((Expand[List[MassMatrix[#,"S"], MassMatrix[#,"PS"]]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num);
-      pdgids=ToString/@(Sort/@List[CalculatePDGFLR/@MassBasis[#,"S"],CalculatePDGFLR/@MassBasis[#,"PS"]]);
-      massbasis=List[ToString/@(MassBasis[#,"S"]/.par_[n_Integer,_]:>par[n]),ToString/@(MassBasis[#,"PS"]/.par_[n_Integer,_]:>par[n])];                 
-      liste=List[matrixsymbol,blockname,ToString/@(Length/@massbasis),massmatrix,pdgids,massbasis];
-      Sequence@@List[liste[[All,1]],liste[[All,2]]],
+		(*Charged Weyls*)
+		Type[#]==="CWeyl",
+			matrixsymbol=ToString/@(List[MatrixSymbol[#][[1]],MatrixSymbol[#][[2]]]);
+			blockname =ToString/@List[BlockName[#][[1]],BlockName[#][[2]]];
+			massmatrix=DefinitionsToStrings/@((Expand[List[MassMatrix[#] . ConjugateTranspose[MassMatrix[#]],ConjugateTranspose[MassMatrix[#]] . MassMatrix[#]]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num);
+			pdgids=ToString/@(List[Sort[CalculatePDGWeyl/@MassBasis[#][[1]]],-Sort[CalculatePDGWeyl/@MassBasis[#][[2]]]]);
+			massbasis=List[ToString/@(MassBasis[#][[1]]/.par_[n_Integer,_]:>par[n]),ToString/@(MassBasis[#][[2]]/.par_[n_Integer,_]:>par[n])];
+			liste=List[matrixsymbol,blockname,ToString/@(Length/@massbasis),massmatrix,pdgids,massbasis];
+			Sequence@@List[liste[[All,1]],liste[[All,2]]],
+			
+		(*Scalars and pseudo scalars*)
+		Type[#]==="SPS",
+			matrixsymbol=ToString/@(List[MatrixSymbol[#,"S"],MatrixSymbol[#,"PS"]]);
+			blockname=ToString/@List[BlockName[#,"S"],BlockName[#,"PS"]];
+			massmatrix=DefinitionsToStrings/@((Expand[List[MassMatrix[#,"S"], MassMatrix[#,"PS"]]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num);
+			pdgids=ToString/@(Sort/@List[CalculatePDGFLR/@MassBasis[#,"S"],CalculatePDGFLR/@MassBasis[#,"PS"]]);
+			massbasis=List[ToString/@(MassBasis[#,"S"]/.par_[n_Integer,_]:>par[n]),ToString/@(MassBasis[#,"PS"]/.par_[n_Integer,_]:>par[n])];                 
+			liste=List[matrixsymbol,blockname,ToString/@(Length/@massbasis),massmatrix,pdgids,massbasis];
+			Sequence@@List[liste[[All,1]],liste[[All,2]]],
+			
     (*Others*)
-    True,
-(*It could be a neutral Weyl*)
-      If[WeylFieldQ[First[MassBasis[#]]]===True,
-        matrixsymbol=ToString[MatrixSymbol[#]];
-        blockname=ToString[BlockName[#]];
-        massmatrix=DefinitionsToStrings[(Expand[MassMatrix[#]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num];
-        pdgids=ToString[Sort[CalculatePDGWeyl/@MassBasis[#]]];
-        massbasis=ToString/@(MassBasis[#]/.part_[n_Integer,_]:>part[n]);
-        liste=List[matrixsymbol,blockname,ToString[Length[massbasis]],massmatrix,pdgids,massbasis,"nsq"],
-(*or a vector field*)
-        matrixsymbol=ToString[MatrixSymbol[#]];
-        blockname=ToString[BlockName[#]];
-        massmatrix=DefinitionsToStrings[Expand[MassMatrix[#]]/.Index[typ_,num_]:>num];
-        pdgids=ToString[Sort[CalculatePDGFLR/@MassBasis[#]]];
-        massbasis=ToString/@(MassBasis[#]/.part_[n_Integer,_]:>part[n]);
-        liste=List[matrixsymbol,blockname,ToString[Length[massbasis]],massmatrix,pdgids,massbasis]]]&/@FR$MassMatrices;
+	True,
+		(*It could be a neutral Weyl*)
+		If[WeylFieldQ[First[MassBasis[#]]]===True,
+			matrixsymbol=ToString[MatrixSymbol[#]];
+			blockname=ToString[BlockName[#]];
+			massmatrix=DefinitionsToStrings[(Expand[MassMatrix[#]]/.n_?(NumericQ[#]&)*pars__:>N[n,30]*pars)/.Index[typ_,num_]:>num];
+			pdgids=ToString[Sort[CalculatePDGWeyl/@MassBasis[#]]];
+			massbasis=ToString/@(MassBasis[#]/.part_[n_Integer,_]:>part[n]);
+			liste=List[matrixsymbol,blockname,ToString[Length[massbasis]],massmatrix,pdgids,massbasis,"nsq"]
+		,
+			(*or a vector field*)
+			matrixsymbol=ToString[MatrixSymbol[#]];
+			blockname=ToString[BlockName[#]];
+			massmatrix=DefinitionsToStrings[Expand[MassMatrix[#]]/.Index[typ_,num_]:>num];
+			pdgids=ToString[Sort[CalculatePDGFLR/@MassBasis[#]]];
+			massbasis=ToString/@(MassBasis[#]/.part_[n_Integer,_]:>part[n]);
+			liste=List[matrixsymbol,blockname,ToString[Length[massbasis]],massmatrix,pdgids,massbasis]
+		]
+	]& /@ FR$MassMatrices;
 
-  (*just making sure that string characters will have a double quote*)
-  tmpdef[[All,6]]=StringReplace[#,"\"]"->"]\""]&/@(StringReplace[#,{WordBoundary~~a__~~WordBoundary:>"\""<>ToString[a]<>"\""}]&/@tmpdef[[All,6]]);
-  (*Creating a unique name for mass matrices of Dirac fermions
-  tmpdef=If[Length[#[[2]]]==2, Append[#[[2]],Unique[#[[2,1]]]],#[[2]]]&/@tmpdef;*)
+	(*just making sure that string characters will have a double quote*)
+	tmpdef[[All,6]] = StringReplace[#,"\"]"->"]\""]&/@(StringReplace[#,{WordBoundary~~a__~~WordBoundary:>"\""<>ToString[a]<>"\""}]&/@tmpdef[[All,6]]);
 
-  cppstream=OpenAppend["src/Parameters.cpp"];
-  hppstream=OpenAppend["inc/Parameters.hpp"];
+	cppstream = OpenAppend["src/Parameters.cpp"];
+	hppstream = OpenAppend["inc/Parameters.hpp"];
   
-  PR$MainASperGePath = FileNameJoin[{Directory[], "src", "running.cpp"}];
-  mainstream=OpenAppend["src/running.cpp"];
+	PR$MainASperGePath = FileNameJoin[{Directory[], "src", "running.cpp"}];
+	mainstream = OpenAppend["src/running.cpp"];
   
-  (*First: the Parameters.hpp*)
-  WriteString[hppstream,"\n    ///map to store the pointers to the functions initialising the mass matrices \n"];
-  WriteString[hppstream,"    map <string,initFP> massInit;\n"];
-  WriteString[hppstream,"    map <string,initFP2> massInit2;\n"];
-
-  (WriteString[hppstream,"    ///function to initialise the "<>#[[1]]<>" mass matrix\n"];
-    If[Length[#[[2]]]==0,
-      WriteString[hppstream,"    void init"<>#[[1]]<>"(gsl_matrix_complex *);\n"],
-      WriteString[hppstream,"    void init"<>#[[1]]<>"(gsl_matrix_complex *,gsl_matrix_complex *);\n"]]; )&/@tmpdef;
-  WriteString[hppstream,"};\n#endif"];
-  Close[hppstream];
+	(*First: the Parameters.hpp*)
+	WriteString[hppstream,"\n    ///map to store the pointers to the functions initialising the mass matrices \n"];
+	WriteString[hppstream,"    map <string,initFP> massInit;\n"];
+	WriteString[hppstream,"    map <string,initFP2> massInit2;\n"];
+	(WriteString[hppstream,"    ///function to initialise the "<>#[[1]]<>" mass matrix\n"];
+	If[Length[#[[2]]]==0,
+		WriteString[hppstream,"    void init"<>#[[1]]<>"(gsl_matrix_complex *);\n"];
+	,
+		WriteString[hppstream,"    void init"<>#[[1]]<>"(gsl_matrix_complex *,gsl_matrix_complex *);\n"];
+	])&/@tmpdef;
+	WriteString[hppstream,"};\n#endif"];
+	Close[hppstream];
   
-  (*Second: the Parameters.cpp*)
-  WriteString[cppstream,"    //map string \"MassSymbol\" to the pointer to the initialising function\n"];
-  If[Length[#[[2]]]==0,
-    WriteString[cppstream,"    massInit[\""<>#[[1]]<>"\"] = &Parameters::init"<>#[[1]]<>";\n\n"],
-    WriteString[cppstream,"    massInit2[\""<>#[[1]]<>"\"] = &Parameters::init"<>#[[1]]<>";\n\n"]]&/@tmpdef;
-  WriteString[cppstream,"}\n"];
+	(*Second: the Parameters.cpp*)
+	WriteString[cppstream,"    //map string \"MassSymbol\" to the pointer to the initialising function\n"];
+	If[Length[#[[2]]]==0,
+		WriteString[cppstream,"    massInit[\""<>#[[1]]<>"\"] = &Parameters::init"<>#[[1]]<>";\n\n"];
+	,
+		WriteString[cppstream,"    massInit2[\""<>#[[1]]<>"\"] = &Parameters::init"<>#[[1]]<>";\n\n"];
+	]&/@tmpdef;
+	WriteString[cppstream,"}\n"];
 
-  (
-  If[Length[#[[2]]]==0,
-  (*Non Dirac matrices*)
-    WriteString[cppstream,"//functions to initialise the "<>#[[1]]<>" mass matrix\n"];
-    WriteString[cppstream,"void Parameters::init"<>#[[1]]<>"(gsl_matrix_complex *m)\n"];
-    WriteString[cppstream,"{\n    gsl_matrix_complex_set_zero(m);\n"];
-    WriteString[cppstream,"    gsl_complex comp;\n"];
-    Table[
-      matrixelement=If[StringMatchQ[#[[4,ii,jj]],"0"],"complex<double>(0.,0.)",#[[4,ii,jj]]];
-      WriteString[cppstream,"    GSL_SET_COMPLEX(&comp,\n    realpart("<>matrixelement<>"),\n    imagpart("<>matrixelement<>"));\n"];
-      WriteString[cppstream,"    gsl_matrix_complex_set(m,"<>ToString[ii-1]<>","<>ToString[jj-1]<>",comp);\n\n"],{ii,ToExpression[#[[3]]]},{jj,ToExpression[#[[3]]]}];
-      WriteString[cppstream,"}\n"],
+	If[Length[#[[2]]]==0,
+		(*Non Dirac matrices*)
+		WriteString[cppstream,"//functions to initialise the "<>#[[1]]<>" mass matrix\n"];
+		WriteString[cppstream,"void Parameters::init"<>#[[1]]<>"(gsl_matrix_complex *m)\n"];
+		WriteString[cppstream,"{\n    gsl_matrix_complex_set_zero(m);\n"];
+		WriteString[cppstream,"    gsl_complex comp;\n"];
+		
+		Table[
+			matrixelement=If[StringMatchQ[#[[4,ii,jj]],"0"],"complex<double>(0.,0.)",#[[4,ii,jj]]];
+			WriteString[cppstream,"    GSL_SET_COMPLEX(&comp,\n    realpart("<>matrixelement<>"),\n    imagpart("<>matrixelement<>"));\n"];
+			WriteString[cppstream,"    gsl_matrix_complex_set(m,"<>ToString[ii-1]<>","<>ToString[jj-1]<>",comp);\n\n"];
+		,{ii,ToExpression[#[[3]]]},{jj,ToExpression[#[[3]]]}];
+		WriteString[cppstream,"}\n"]
+	,
 
- (*Dirac matrices*)
-    WriteString[cppstream,"//functions to initialise the "<>#[[1]]<>" mass matrix\n"];
-  \[NonBreakingSpace] WriteString[cppstream,"void Parameters::init"<>#[[1]]<>"(gsl_matrix_complex *m,gsl_matrix_complex *m2)\n"];
-    WriteString[cppstream,"{\n    gsl_matrix_complex_set_zero(m);gsl_matrix_complex_set_zero(m2);\n"];
-    WriteString[cppstream,"    gsl_complex comp;\n"];
-    WriteString[cppstream,"   //fill m;\n"];
+		(*Dirac matrices*)
+		WriteString[cppstream,"//functions to initialise the "<>#[[1]]<>" mass matrix\n"];
+		WriteString[cppstream,"void Parameters::init"<>#[[1]]<>"(gsl_matrix_complex *m,gsl_matrix_complex *m2)\n"];
+		WriteString[cppstream,"{\n    gsl_matrix_complex_set_zero(m);gsl_matrix_complex_set_zero(m2);\n"];
+		WriteString[cppstream,"    gsl_complex comp;\n"];
+		WriteString[cppstream,"   //fill m;\n"];
 
-    Table[
-      matrixelement=If[StringMatchQ[#[[4,1,ii,jj]],"0"],"complex<double>(0.,0.)",#[[4,1,ii,jj]]];
-      WriteString[cppstream,"    GSL_SET_COMPLEX(&comp,\n    realpart("<>matrixelement<>"),\n    imagpart("<>matrixelement<>"));\n"];
-      WriteString[cppstream,"    gsl_matrix_complex_set(m,"<>ToString[ii-1]<>","<>ToString[jj-1]<>",comp);\n\n"],{ii,ToExpression[#[[3]]]},{jj,ToExpression[#[[3]]]}];
-      WriteString[cppstream,"\n"];
-      WriteString[cppstream,"   //fill m2;\n"];
+		Table[
+			matrixelement=If[StringMatchQ[#[[4,1,ii,jj]],"0"],"complex<double>(0.,0.)",#[[4,1,ii,jj]]];
+			WriteString[cppstream,"    GSL_SET_COMPLEX(&comp,\n    realpart("<>matrixelement<>"),\n    imagpart("<>matrixelement<>"));\n"];
+			WriteString[cppstream,"    gsl_matrix_complex_set(m,"<>ToString[ii-1]<>","<>ToString[jj-1]<>",comp);\n\n"];
+		,{ii,ToExpression[#[[3]]]},{jj,ToExpression[#[[3]]]}];
+		WriteString[cppstream,"\n"];
+		WriteString[cppstream,"   //fill m2;\n"];
 
-    Table[
-      matrixelement=If[StringMatchQ[#[[4,2,ii,jj]],"0"],"complex<double>(0.,0.)",#[[4,2,ii,jj]]];
-      WriteString[cppstream,"    GSL_SET_COMPLEX(&comp,\n    realpart("<>matrixelement<>"),\n    imagpart("<>matrixelement<>"));\n"];
-      WriteString[cppstream,"    gsl_matrix_complex_set(m2,"<>ToString[ii-1]<>","<>ToString[jj-1]<>",comp);\n\n"],{ii,ToExpression[#[[3]]]},{jj,ToExpression[#[[3]]]}];
-      WriteString[cppstream,"}\n"]]; )&/@tmpdef;
+		Table[
+			matrixelement=If[StringMatchQ[#[[4,2,ii,jj]],"0"],"complex<double>(0.,0.)",#[[4,2,ii,jj]]];
+			WriteString[cppstream,"    GSL_SET_COMPLEX(&comp,\n    realpart("<>matrixelement<>"),\n    imagpart("<>matrixelement<>"));\n"];
+			WriteString[cppstream,"    gsl_matrix_complex_set(m2,"<>ToString[ii-1]<>","<>ToString[jj-1]<>",comp);\n\n"];
+		,{ii,ToExpression[#[[3]]]},{jj,ToExpression[#[[3]]]}];
+		WriteString[cppstream,"}\n"]
+	]& /@ tmpdef;
   
-  (* Destructor *)
-  WriteString[cppstream, "
+	(* Destructor *)
+	WriteString[cppstream, "
 
 Parameters::~Parameters()
-{
-"];
-  (WriteString[cppstream,"    delete " <> # <> ";\n"])& /@ PR$CppParams;
-  WriteString[cppstream,"}\n\n"];
-  
-  Close[cppstream];
-  
-  (* running.cpp *)
-  
-   AuxBlockStrings[def_] := Block[{blockList, extList, tabString, argString, massPDG},
-	blockList = def[[2]];
-	If[Head@blockList =!= List, blockList = {blockList}];
+{\n"
+	];
 
-	blockList = Riffle[blockList, "IM" <> # & /@ blockList];
-	extList = ({#[[1]], #[[2,All,2,1]]}& @Select[EParamList, Function[{$E}, ToString[$E[[1]]] === # ]][[1]])& /@ blockList;
+	(WriteString[cppstream,"    delete " <> # <> ";\n"])& /@ PR$CppParams;
+	WriteString[cppstream,"}\n\n"];
+
+	Close[cppstream];
+
+	(* running.cpp *)
+  
+	AuxBlockStrings[def_] := Block[{blockList, extList, tabString, argString, massPDG},
+		blockList = def[[2]];
+		If[Head@blockList =!= List, blockList = {blockList}];
+
+		blockList = Riffle[blockList, "IM" <> # & /@ blockList];
+		extList = ({#[[1]], #[[2,All,2,1]]}& @Select[EParamList, Function[{$E}, ToString[$E[[1]]] === # ]][[1]])& /@ blockList;
  
-	extList = Function[{b},{b[[1]], Position[PR$allExternals, #][[1,1]]& /@ b[[2]]}] /@ extList;
+		extList = Function[{b},{b[[1]], Position[PR$allExternals, #][[1,1]]& /@ b[[2]]}] /@ extList;
 
-	extList = Prepend[extList, {def[[1]], MassPositionFromPDG /@ToExpression[#]}]& @ If[Head@def[[-2]] =!= List, def[[-2]], def[[-2,1]]];
+		extList = Prepend[extList, {def[[1]], MassPositionFromPDG /@ToExpression[#]}]& @ If[Head@def[[-2]] =!= List, def[[-2]], def[[-2,1]]];
 
-	tabString = StringJoin[("    double* p" <> ToString[#[[1]]] <> "[] = {" 
-					<> StringRiffle[Function[{p},If[p != 0, "res+"<> ToString[p-1], "NULL"]]/@ #[[2]], ","] <> "};\n"  )& /@ extList];
+		tabString = StringJoin[("    double* p" <> ToString[#[[1]]] <> "[] = {" 
+						<> StringRiffle[Function[{p},If[p != 0, "res+"<> ToString[p-1], "NULL"]]/@ #[[2]], ","] <> "};\n"  )& /@ extList];
 
-	argString = StringRiffle["p" <> ToString[#[[1]]]& /@ extList, ","];
+		argString = StringRiffle["p" <> ToString[#[[1]]]& /@ extList, ","];
 
-	Return[{tabString, argString}];
-   ];
+		Return[{tabString, argString}];
+	];
 
-  WriteString[mainstream,"#include \"headers.hpp\"
+	WriteString[mainstream,"#include \"headers.hpp\"
 #include \"Parameters.hpp\"
 #include \"MassMatrix.hpp\"
 #include \"MassMatrixNF.hpp\"
@@ -3259,27 +3286,33 @@ void diagonalize(double* externals, double* res)
 
     MassMatrix::par = new Parameters();
     MassMatrix::par->init(externals);\n\n"
-  ];
-  WriteString[mainstream,"    //mass matrix constructor arguments:\n"];
-  WriteString[mainstream,"    //Symbol, block, IMblock, matrix dimension, Pdg-Ids, particles' names.//\n"];
-  (*Karen 08/05/2013 changed the following line in order to make ASperGe compatible with gcc 4.8*)
-  Block[{auxStrings = AuxBlockStrings[#]},
-  If[Length[#[[2]]]==0,
-      WriteString[mainstream, "\n" <> auxStrings[[1]]];
-      If[Length[#]===6,
-        WriteString[mainstream,"    MassMatrix* M" <> #[[1]] <> " = new MassMatrix(\""<>#[[1]]<>"\"," <> auxStrings[[2]] <> ","<>#[[3]]<>");\n"]
-        ,
-        WriteString[mainstream,"    MassMatrixNF* M" <> #[[1]] <> " = new MassMatrixNF(\""<>#[[1]]<>"\"," <> auxStrings[[2]] <> ","<>#[[3]]<>");\n"]]
-     ,
-      WriteString[mainstream, "\n" <> auxStrings[[1]]];
-      WriteString[mainstream,"    MassMatrixTwoMix* M" <> #[[1]] <> " = new MassMatrixTwoMix(\""<>#[[1]]<>"\"," <> auxStrings[[2]] <> ","<>#[[3]]<>");\n"]];
-  ]&/@tmpdef;
-  WriteString[mainstream,"\n    //diagonalizes all the members of the class MassMatrix//\n"];
-  WriteString[mainstream,"    MassMatrix::generateAll();\n\n    // Clean\n"];
-  (WriteString[mainstream,"    delete M" <> #[[1]] <> ";\n"])& /@ tmpdef;
-  WriteString[mainstream,"\n    delete MassMatrix::par;\n}\n\n"];
+	];
 
-  Close[mainstream];
+	WriteString[mainstream,"    //mass matrix constructor arguments:\n"];
+	WriteString[mainstream,"    //Symbol, block, IMblock, matrix dimension, Pdg-Ids, particles' names.//\n"];
+
+	(*Karen 08/05/2013 changed the following line in order to make ASperGe compatible with gcc 4.8*)
+	Block[{auxStrings = AuxBlockStrings[#]},
+		If[Length[#[[2]]]==0,
+			WriteString[mainstream, "\n" <> auxStrings[[1]]];
+			
+			If[Length[#]===6,
+				WriteString[mainstream,"    MassMatrix* M" <> #[[1]] <> " = new MassMatrix(\""<>#[[1]]<>"\"," <> auxStrings[[2]] <> ","<>#[[3]]<>");\n"]
+			,
+				WriteString[mainstream,"    MassMatrixNF* M" <> #[[1]] <> " = new MassMatrixNF(\""<>#[[1]]<>"\"," <> auxStrings[[2]] <> ","<>#[[3]]<>");\n"]
+			];
+		,
+			WriteString[mainstream, "\n" <> auxStrings[[1]]];
+			WriteString[mainstream,"    MassMatrixTwoMix* M" <> #[[1]] <> " = new MassMatrixTwoMix(\""<>#[[1]]<>"\"," <> auxStrings[[2]] <> ","<>#[[3]]<>");\n"]
+		];
+	]& /@ tmpdef;
+	
+	WriteString[mainstream,"\n    //diagonalizes all the members of the class MassMatrix//\n"];
+	WriteString[mainstream,"    MassMatrix::generateAll();\n\n    // Clean\n"];
+	(WriteString[mainstream,"    delete M" <> #[[1]] <> ";\n"])& /@ tmpdef;
+	WriteString[mainstream,"\n    delete MassMatrix::par;\n}\n\n"];
+
+	Close[mainstream];
 ];
 
 
@@ -3378,7 +3411,7 @@ PR$WriteASperGe[ufoFolder_, lag_] := Block[{dirname, location, interfacedir, mix
 	WriteFiles[];
 	Print[Style["Done.",Orange]];
 	
-	(*Come back to where we were*)
+	(* Come back to where we were *)
 	SetDirectory[location];
 ];
 
@@ -3392,7 +3425,6 @@ PR$WriteASperGe[ufoFolder_, lag_] := Block[{dirname, location, interfacedir, mix
 
 
 SetAttributes[WritePyRATE, HoldAll];
-
 Options[WritePyRATE] = {
 	OutputFolder        -> "",
 	UsePyReps           -> True,
@@ -3401,8 +3433,10 @@ Options[WritePyRATE] = {
 	GuessYukawaCoeff    -> True
 };
 
+
 WritePyRATE[opt:OptionsPattern[]] := WritePyRATE[{Nothing}, Evaluate @ opt];
 WritePyRATE[lags__, opt:OptionsPattern[]] := WritePyRATE[{lags}, Evaluate @ opt];
+
 
 WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagPartsNoHC, lagTerms, lagTermsNoHC, sortingFunction},
 	(* Check wether the interface is enabled / configured *)
@@ -3437,7 +3471,7 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 	];
 
 	If[err === False || Head@lagParts =!= List || Head@lagParts[[1]] === Symbol,
-		Print["An error occured while reading the Lagrangian. Aborting."];
+		Print[Style["An error occured while reading the Lagrangian. Aborting.", Red]];
 		Abort[];
 	];
 
@@ -3565,17 +3599,19 @@ RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrate
 	If[PR$loops =!= 1, args = Join[args, {"-l", ToString @ PR$loops}]];
 
 	fullCommand = fullCommand <> " " <> StringRiffle[args, " "];
-	
-	If[OptionValue[Verbose] === True,
-		Print["Full PyR@TE command :\n\n", fullCommand, "\n\n"];
-	];
 
 	SetSharedVariable[fullCommand];
 	(* Prepare the dynamic printing *)
 	PR$PyrateOutput := ReadOutput[];
 	output = Dynamic[PR$PyrateOutput, UpdateInterval -> OptionValue[OutputRefreshInterval]];
 
-	Print[Style["\nRunning PyR@TE:", FontWeight->Bold, Orange]];
+	Print[Style["\nRunning PyR@TE:", FontWeight->Bold, Orange],
+		Sequence @@ If[OptionValue[Verbose],
+			{"\n\n[Info] The full command is \"", Style[fullCommand, FontFamily->"Courier"], "\"\n"}
+		,
+			{""}
+		]
+	];
 	Print[Style[output, FontFamily->"Courier"]];
 
 	(* Actual run *)
@@ -3583,7 +3619,7 @@ RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrate
 	PR$PyrateOutput = ReadOutput[];
 
 	If[PR$PyrateOutput == "", PR$PyrateOutput = "Error : unable to run PyR@TE ...\n The full command was :\n\t" <> fullCommand];
-	If[Mod[ret[[1]], 256] =!= 0, Print["An error occurred while running PyR@TE..."]];
+	If[Mod[ret[[1]], 256] =!= 0, Print[Style["An error occurred while running PyR@TE...", Red]]];
 
 	If[ufoOut,
 		(* Merge the main asperge file with RGE solving functions + compile *)
@@ -3601,5 +3637,6 @@ RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrate
 		ascentTarget = FileNameJoin[{ParentDirectory@DirectoryName[PR$MainASperGePath], "inc", "ascent"}];
 
 		CopyDirectory[ascentFolder, ascentTarget];
+		Print[Style["Done.", Orange]];
 	];
-]
+];
