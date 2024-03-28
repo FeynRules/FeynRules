@@ -1,5 +1,8 @@
 Update notes for FeynRules 2.3.x
 
+     2.3.50 28-04-24 fuks:  new branch for the interface between FeynRules
+                            and Pyrate
+
 2647 2.3.49 29-09-21 degrande:   bug fixes 
 
 2644 2.3.48 23-08-21 fuks:       Bug fix in CheckDiagonalKineticTerms 
