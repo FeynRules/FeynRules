@@ -12,8 +12,8 @@ FR$Loaded = True;
 
 BeginPackage["FeynRules`"];
 
-FR$VersionNumber = "2.3.49";
-FR$VersionDate = "29 September 2021";
+FR$VersionNumber = "2.3.50";
+FR$VersionDate = "28 March 2024";
 
 Print[" - FeynRules - "];
 Print["Version: ", FR$VersionNumber, " ("FR$VersionDate, ")."];
@@ -151,7 +151,6 @@ is turned to True.";
 QuantumNumbers::usage = "Property of the particle classes, listing the quantum numbers of the class (charge, lepton numbers,...). 
 The default value is {}.";
 
-(* MW edit: usage of the U1Charges option *)
 U1Charges::usage = "Property of the particle classes, listing the particles charges under different U(1) symmetries. The values must
 be give as a list of pairs. The first element of each pair is the symbol representing the U(1) charge, as defined with the property Charge
 in the gauge group declaration or as given explicitely in the covariant derivative DC. The second element is the charge of the particle under
@@ -590,8 +589,8 @@ FRPi::usage = "Internal representation of Pi in some of the interfaces.";
 \!\(TraditionalForm\`PYOrderFermions\)::usage = "Internal FR function.";
 
 
-(* ::Subsection::Closed:: *)
-(*Usefull symbol to write down the lagrangian*)
+(* ::Subsection:: *)
+(*Useful symbols to write down the Lagrangian*)
 
 
 gs::usage = "Mandatory name for the strong coupling for interfaces.";
@@ -793,7 +792,7 @@ MR$FlavorList::usage = "List containing all flavor indices deined in the model f
 
 
 (* ::Subsection:: *)
-(*Other usefull symbols and functions*)
+(*Other useful symbols and functions*)
 
 
 H::usage = "Symbol used in the MG interface to denote HEFT couplings.";
@@ -919,6 +918,12 @@ ApplyDefinitions::usage = "Interanl FeynRules function.";
 DTermFormat::usage = "Internal function";
 
 AuxiliaryGluonMass::usage = "";
+
+HasBarRepQ::usage = "Set to True if the index of a representation has a bar representation";
+
+IsBarRepQ::usage = "return to True if the index of a representation is a bar representation";
+
+BarRep::usage = "return the bar representation";
 
 
 (* ::Subsection:: *)
@@ -1093,15 +1098,17 @@ numQ[FR$LoopDum]=True;
 
 FR$LoopSwitches::usage = "Give the list of exchange between the external parameters and the internal one for the on-shell renormalization";
 FR$RmDblExt::usage = "Give the list of replacement rules between the external parameters that are doubly defined";
+FR$QCDRenormalize::usage = "Give the list of parameters that must be renormalized in the case of QCD corrections";
 
 FR$Eps::usage = "Internal FeynRules symbol for the dimensional regulator.";
+invFREps::usage = "Internal FeynRules symbol for the inverse of the dimensional regulator.";
 FR$MU::usage = "Internal FeynRules symbol for the renormalisation scale.";
 FR$Cond::usage = "Internal FeynRules symbol for the condition function FR$Cond[a,b,c] = If[a==0,b,c].";
 
 FR$CT::usage = "FeynRules symbole for the one-loop counterterms expansion";
 
 OnShellRenormalization::usage = "return the renormalized Lagrangian in the on-shell scheme, i.e. all the masses are considered as external parameters. The 
-options are QCDOnly, FlavorMixing, Only2Point, Simplify2pt and Exclude4ScalarsCT";
+options are QCDOnly, FlavorMixing, Only2Point, Simplify2pt, Exclude4ScalarsCT, OnshellMixing, MixAndTadOnly";
 
 QCDOnly::usage = "If True, the on-shell renormalization is only done for the field having QCD interactions and the couplings with non-zero QDC interaction order.
  The default is False.";
@@ -1116,6 +1123,10 @@ Default is True";
 
 Exclude4ScalarsCT::usage="if True, the four scalar terms are keep in the lagrangian but not renormalized. Default is False";
 
+OnShellMixing::usage="Renormalize the external parameters for the mixing of those physical fields using the antisymmetric part of the wave function CT mixing matrix";
+
+MixAndTadOnly::usage="Renormalize the wave function only and only with the off-diagonal mixing wave function counterterms and the tadpoles for loop-induced processes";
+
 
 numQ[FR$Eps]=True;
 CnumQ[FR$Eps]=False;
@@ -1123,6 +1134,7 @@ CnumQ[FR$Eps]=False;
 
 R2Vertices::usage = "Option of WriteUFO. The list of R2 vertices, as they come out of FeynArts. The default is an empty list.";
 UVCounterterms::usage = "Option of WriteUFO. The list of UV counterterms, as they come out of FeynArts. The default is an empty list.";
+UVLoopCounterterms::usage = "Option of WriteUFO. The list of finite counterterms, like SUSY restoring counterterms. It should be given as the output of the FeynmanRules function. The default is an empty list.";
 CTParameters::usage = "Option of WriteUFO. The list of CT paramters, as they come out of FeynArts. The default is an empty list.";
 IPL::usage = "Internal variable tagging the particles running insides a loop.";
 
@@ -1323,12 +1335,42 @@ FR$FeynmanRules::usage="Internal FR coubter";
 FR$IndexExpandCounter::usage="Internal FR coubter";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*EFT*)
 
 
 NoDefinitions::usage = "To forbid field rotations";
 
+
+
+(* ::Subsection::Closed:: *)
+(*PyRATE interface*)
+
+
+(* Usable in model files *)
+GaugeField::usage="Tag a field as a gauge field"
+PyrateRep::usage="Tag a representation matrix in the Pyr@te representation matrix system";
+
+(* Interface methods / attributes *)
+DisableFeynRulesPyRATEInterface::usage = "Disable the interface between FeynRules and PyR@te";
+EnableFeynRulesPyRATEInterface::usage = "Enable the interface between FeynRules and PyR@te";
+
+PR$SetPaths::usage = "Set the paths to Python and Pyr@te";
+Python::usage = "Option of PR$SetPaths (Python path)";
+PyRATE::usage = "Option of PR$SetPaths (PyR@te path)";
+PR$PythonPath::usage = "Path to the python executable";
+PR$PyratePath::usage = "Path to the Pyrate folder";
+PR$PyLiePath::usage = "Path to the PyLie folder";
+
+PyrateTag::usage = "Nature of the gauge factor; \!\(\*
+StyleBox[\"e\",\nFontSlant->\"Italic\"]\)\!\(\*
+StyleBox[\".\",\nFontSlant->\"Italic\"]\)\!\(\*
+StyleBox[\"g\",\nFontSlant->\"Italic\"]\)\!\(\*
+StyleBox[\".\",\nFontSlant->\"Italic\"]\) U1, SU2, ...";
+
+WritePyRATE::usage="Main interface method of the FeynRules-PyR@te interface, generating a PyR@te model file";
+
+RunPyRATE::usage="Main interface method of the FeynRules-PyR@TE interface, externally calling PyR@TE to produce the RGEs of the model";
 
 
 (* ::Section:: *)
@@ -1503,6 +1545,8 @@ RGE::SuperWparams="The superpotential must contain at most one term for each par
 
 RGE::SuperWrenorm="The superpotential contains non-renormalizable interactions";
 
+DC::Rep2="The same index appears twice in one field, unable to resolve the summation";
+
 IntOrder::Overwrite = "Warning: Conflicting definitions for InteractionOrder `1` found for `2`. Last definition is kept.";
 
 
@@ -1607,8 +1651,8 @@ FormFactor::VertexParticles = "Warning: Form factor `1` appears inside a vertex 
 
 NLO::FR$Eps = "Warning: Coefficients of Laurent series in \[Epsilon] still depend on \[Epsilon].";
 NLO::Failed = "Failed to construct Laurent expansion.";
-
 NLO::ExtMass = "Error : Not all the masses are external parameters.";
+NLO::OnShellMixing = "Error : OnshellMixing should be a classname of physical fields, a list of mixing physical fields or a list of those two types of elements.";
 
 
 (* ::Section:: *)
@@ -1772,7 +1816,7 @@ M$RenormalizationConstants={};
 $OptIndex=1;
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*The FR$Dot function*)
 
 
@@ -1783,7 +1827,6 @@ FR$Dot[] = 1;
 FR$Dot[xx___, aa_ + b_, yy___] := FR$Dot[xx, aa, yy] + FR$Dot[xx, b, yy];
 FR$Dot[xx___, aa_*(b_ + c_), yy___] := FR$Dot[xx, aa * b ,yy] + FR$Dot[xx, aa * c, yy];
 FR$Dot[xx___, n_?numQ * f_, yy___] := n * FR$Dot[xx, f, yy];
-(* MW edit: as below, only pull out scalar fields with all indices written out *)
 FR$Dot[xx___, n_?((ScalarFieldQ[#]  && Not[GhostFieldQ[#] === True] && Length[$IndList[#]] == 0)&)* f_, yy___] := n * FR$Dot[xx, f, yy];
 FR$Dot[xx___, n_?((ScalarFieldQ[#]  && Not[GhostFieldQ[#] === True])&)[ind__]* f_, yy___] := n[ind] * FR$Dot[xx, f, yy];
 FR$Dot[xx___, Power[n_?((ScalarFieldQ[#]  && Not[GhostFieldQ[#] === True])&), m_]* f_, yy___] := Power[n, m] * FR$Dot[xx, f, yy];
@@ -1893,6 +1936,7 @@ Block[{$Path = {$LocalFeynRulesPath,
     << "PYIntMain.m";
     << "SuSpectInterface.m";
     << "AspergeInterface.m";
+    << "PyRATEInterface.m";
     End[];
     FR$Message={True,True,True,True,True,True};
  ];
