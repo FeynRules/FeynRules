@@ -1,0 +1,224 @@
+Update notes for FeynRules 2.4.x
+
+2646 2.4.91 29-09-21 degrande:   bug fixes temporary 
+
+2645 2.4.90 23-08-21 fuks:       Bug fix in CheckDiagonalKineticTerms 
+                                 (thanks to J. Hajer) 
+
+2643 2.4.89 08-07-21 fuks:       Compatibility with math12, again 
+
+2641 2.4.88 25-05-21 fuks:       Mathematica 12.2 and parallelisation are 
+                                 fixed 
+
+2639 2.4.87 21-05-21 fuks:       Updating the WO interface to version 3.0.0 
+
+2637 2.4.86 21-05-21 fuks:       Compatibility with mathematica 12.2 (next 
+                                 episode) 
+
+2636 2.4.85 21-05-21 fuks:       Compatibility with mathematica 12.2 (next 
+                                 episode) 
+
+2634 2.4.84 21-05-21 fuks:       Compatibility with Mathematica 12.2 
+
+2632 2.4.83 14-02-21 claudeduhr: bug fix in numQ for exponentials 
+
+2630 2.4.82 27-01-21 claudeduhr: fixed conflict 
+
+2629 2.4.81 09-12-20 claudeduhr: fixed merge conflict 
+
+2627 2.4.80 02-12-20 claudeduhr: bla 
+
+2627 2.4.79 02-12-20 claudeduhr: bla 
+
+2625 2.4.78 23-03-20 degrande:   bug fixed with max power of gs and axial 
+                                 anomaly 
+
+2617 2.4.77 09-01-20 degrande:   fix bug with propinternal 
+
+2616 2.4.76 12-12-19 degrande:   bug fixed for 2pt function after axialano 
+
+2615 2.4.75 28-11-19 degrande:   bug fixed for 2F after axial anomaly 
+
+2613 2.4.74 24-10-19 degrande:   split of pole in the CTparameters for the 
+                                 UFO and maxpropagator option in NLOCT 
+
+2612 2.4.73 15-10-19 clduhr:     Removed rogue Print[ ] statements form 
+                                 interfaces and fixed shadow warning for 
+                                 args when loading the package 
+
+2610 2.4.72 04-06-19 degrande:   add option for the FA path and external 
+                                 launchkernel 
+
+2609 2.4.71 30-05-19 degrande:   para for amp in SMEFT 
+
+2605 2.4.70 06-05-19 degrande:   optimising for EFT 
+
+2604 2.4.69 21-02-19 degrande:   fix for levicivita in FA interface 
+
+2603 2.4.68 20-09-18 degrande:   bug fixed with SUNT 
+
+2596 2.4.67 06-07-18 degrande:   faster load restrictions 
+
+2595 2.4.66 18-06-18 degrande:   bug fixed with name of local var 
+
+2592 2.4.65 12-03-18 clduhr:     Fix in object_library.py signalled by O 
+                                 Mattelaer. 
+
+2588 2.4.64 24-01-18 claudeduhr: Fixed bug signaled by A. Coogan. 
+
+2576 2.4.63 06-07-17 clduhr:     bug fix in __init__.py for FR-cdevelopment: 
+                                 missing import function_libraryy statement. 
+                                 Pointed out by Olivier, after bug report on 
+                                 launchpad. 
+
+2574 2.4.62 21-05-17 fuks:       Adding the sextet Clebsch to the index 
+                                 optimization routine 
+
+2572 2.4.61 09-05-17 fuks:       Bug in the FA interface fixed and another 
+                                 one in NLOCT 
+
+2567 2.4.60 10-02-17 degrande:   bug fix for the reno 
+
+2565 2.4.59 09-02-17 fuks:       Pyr@te interface version 0.1 
+
+2562 2.4.58 08-02-17 claudeduhr: Fix pointed out by Benj for HC. To be 
+                                 confirmed by Liam. 
+
+2558 2.4.57 06-12-16 clduhr:     Fix of WOinterface (first one was buggy 
+                                 still) 
+
+2556 2.4.56 05-12-16 clduhr:     Fix to WO interfaces using patches sent by 
+                                 JRR in August 
+
+2554 2.4.55 29-11-16 degrande:   bug fixes 
+
+2549 2.4.54 26-08-16 degrande:   color id for five gluon 
+
+2548 2.4.53 19-08-16 degrande:   bug fix for tadpolein eft 
+
+2546 2.4.52 12-08-16 degrande:   4F development 
+
+2545 2.4.51 02-08-16 degrande:   fix for valentin 
+
+2544 2.4.50 28-07-16 degrande:   fix the init commit issue 
+
+2543 2.4.49 28-07-16 degrande:   fix for benj eps 
+
+2543 2.4.48 28-07-16 degrande:   Fix for benj eps 
+
+2543 2.4.47 28-07-16 degrande:   benj eps issue 
+
+2542 2.4.46 19-07-16 clduhr:     Added patched Initialisation.m (by Liam) to 
+                                 development. 
+
+2540 2.4.45 23-06-16 degrande:   bug fixes related to barRep 
+
+2539 2.4.44 20-06-16 degrande:   bar representation implementation 
+
+2537 2.4.43 20-05-16 degrande:   fix slow UFO interface 
+
+2525 2.4.42 30-03-16 degrande:   fix for the EW NLO SM 
+
+2524 2.4.41 21-03-16 degrande:   index handeling bug fix 
+
+2523 2.4.40 10-03-16 degrande:   Bug fixed for order and NLOCT 
+
+2522 2.4.39 08-03-16 degrande:   evanescent operators v1 
+
+2520 2.4.38 19-02-16 degrande:   nlo 4F dev and bug fix for reno for Benj 
+
+2519 2.4.37 16-02-16 degrande:   2 int order bug as current version 
+
+2516 2.4.36 15-02-16 degrande:   bug fix for multifermion in FR 
+
+2515 2.4.35 11-02-16 degrande:   EFT development and color bug fixed 
+
+2514 2.4.34 29-01-16 degrande:   MZ scheme, bugs fixes, EFT dev 
+
+2511 2.4.33 12-01-16 clduhr:     Bug fix: DTerm = SymmetricTensor in 
+                                 FeynRulesPackage.m (development) 
+
+2507 2.4.32 24-11-15 degrande:   develop for Tensor at nlo 
+
+2506 2.4.31 13-11-15 degrande:   fix for DTr with internal mom 
+
+2505 2.4.30 12-11-15 degrande:   bug fix in loop and speed up in nloct for 
+                                 eft 
+
+2502 2.4.29 08-11-15 degrande:   dev of NLOCT for EFT 
+
+2500 2.4.28 03-11-15 degrande:   trace for EFT nlo 
+
+2499 2.4.27 02-11-15 degrande:   further tensor dev 
+
+2495 2.4.26 21-10-15 degrande:   bug fix in nloct eft for tensor 
+
+2493 2.4.25 07-10-15 degrande:   bug fix for tensor in FA int and in NLOCT 
+                                 for eps 
+
+2491 2.4.24 06-10-15 fuks:       Bug with the CTparameters fixed 
+
+2490 2.4.23 04-10-15 degrande:   bug fix for tensor 
+
+2489 2.4.22 03-10-15 degrande:   for tensor not in the loop 
+
+2486 2.4.21 21-09-15 fuks:       Bug fix in ASperge 
+
+2485 2.4.20 20-09-15 degrande:   adding onshell mixing 
+
+2483 2.4.19 08-09-15 clduhr:     Bug fix in development: variable w in 
+                                 ToolBox.m gave Shadow warning. 
+
+2481 2.4.18 07-09-15 fuks:       small bug with NLOCT when CTParam are used 
+                                 with simple models 
+
+2477 2.4.17 21-08-15 fuks:       Updating the CTparameter stuff 
+
+2476 2.4.16 20-08-15 fuks:       CTPArameters + OS susy 
+
+2475 2.4.15 20-08-15 degrande:   fix for majorana 
+
+2472 2.4.14 11-08-15 fuks:       Modifiation of loop.m: addition of the 
+                                 possibility of forcing the QCD 
+                                 renormnalization of apparently non-QCD 
+                                 parameters 
+
+2471 2.4.13 07-08-15 degrande:   more bug fix for notation change 
+
+2470 2.4.12 07-08-15 degrande:   bug fix for new notation for FV 
+
+2469 2.4.11 07-08-15 degrande:   bug for levicivita with 3.9 
+
+2466 2.4.10 05-08-15 fuks:       Last fix for the m2=2m1 bug in NLOCT 
+
+2465 2.4.9 05-08-15 degrande:   fix for benj with m2=2m1 
+
+2463 2.4.8 27-07-15 fuks:       Fixing a small bug with the Sig matrices 
+
+2461 2.4.7 27-07-15 fuks:       Bug in ExpandIndices: TensDot structure 
+                                 with HC matrices inside; the bug was also 
+                                 present in the UFO interface 
+
+2460 2.4.6 24-07-15 degrande:   renormalization of the parametername 
+
+2457 2.4.5 22-07-15 degrande:   bug fixes for nlo 
+
+2454 2.4.4 09-07-15 fuks:       Fixing bugs in NLOCT and for the 
+                                 renormalization of the majorana particles 
+
+2452 2.4.3 24-06-15 degrande:   fix for epsilon 
+
+2450 2.4.2 18-06-15 degrande:   bug fix flavor expansion in FA and CC in 
+                                 nlo stuff 
+
+2437 2.4.1 10-05-15 fuks:       Small bug for the spin 3/2 fields found in 
+                                 the decay package (thanks to Damien Tant) 
+
+2432 2.4.0 28-04-15 fuks:       Releasing version 2.4:
+                                 - Bug fixes
+                                 - Update of the WO interface
+                                 - Mathematica 10 compatiblity
+                                 - Update of NLOCT
+                                 - Speed improvement of various modules
+
+2191 2.1.0 09-10-13 fuks:       Release of version 2.1.0 

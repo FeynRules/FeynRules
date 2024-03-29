@@ -1,0 +1,17 @@
+# $Id: Makefile.in 3435 2011-07-24 22:20:34Z cnspeckn $
+
+prefix = @prefix@
+subdirs = omega whizard
+
+all:
+	for dir in $(subdirs); do make -C$${dir} all || exit 1; done
+
+install:
+	for dir in $(subdirs); do make -C$${dir} install || exit 1; done
+	@echo
+	@echo 'The model has been installed in "$(prefix)" and is ready for use.'
+
+clean:
+	for dir in $(subdirs); do make -C$${dir} clean || exit 1; done
+
+.PHONY: all install clean
