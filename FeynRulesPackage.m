@@ -32,7 +32,7 @@ Print["The FeynRules palette can be opened using the command FRPalette[]."];
 (*FeynRules symbols definitions*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*System variables*)
 
 
@@ -124,7 +124,7 @@ FR$FExpand::usage = "If true, the full expansion is perform to obtain vertices a
 If[Global`FR$FullExpand===False,FR$FExpand=False,FR$FExpand=True];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Particle class properties*)
 
 
@@ -378,7 +378,7 @@ Hermitian::usage = "Property of the parameter classes, specifying whether a tens
 be complex. the default value is False.";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Basic functions*)
 
 
@@ -589,7 +589,7 @@ FRPi::usage = "Internal representation of Pi in some of the interfaces.";
 \!\(TraditionalForm\`PYOrderFermions\)::usage = "Internal FR function.";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Useful symbols to write down the Lagrangian*)
 
 
@@ -791,7 +791,7 @@ NumericalValue::usage = "NumericalValue[param] returns the numerical value of a 
 MR$FlavorList::usage = "List containing all flavor indices deined in the model file.";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Other useful symbols and functions*)
 
 
@@ -926,7 +926,7 @@ IsBarRepQ::usage = "return to True if the index of a representation is a bar rep
 BarRep::usage = "return the bar representation";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Superfields*)
 
 
@@ -1067,7 +1067,7 @@ SuperCurrent::usage="Compute the supercurrent associated to a SUSY Lagrangian.";
 FR$Sugra=1;
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Loop stuff*)
 
 
@@ -1232,7 +1232,7 @@ WriteSuSpectOutput::usage="Writes files to be linked to SuSpect 3.";
 yVector::usage="";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Decay package*)
 
 
@@ -1343,24 +1343,13 @@ NoDefinitions::usage = "To forbid field rotations";
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*PyRATE interface*)
 
 
 (* Usable in model files *)
-GaugeField::usage="Tag a field as a gauge field"
-PyrateRep::usage="Tag a representation matrix in the Pyr@te representation matrix system";
-
-(* Interface methods / attributes *)
-DisableFeynRulesPyRATEInterface::usage = "Disable the interface between FeynRules and PyR@te";
-EnableFeynRulesPyRATEInterface::usage = "Enable the interface between FeynRules and PyR@te";
-
-PR$SetPaths::usage = "Set the paths to Python and Pyr@te";
-Python::usage = "Option of PR$SetPaths (Python path)";
-PyRATE::usage = "Option of PR$SetPaths (PyR@te path)";
-PR$PythonPath::usage = "Path to the python executable";
-PR$PyratePath::usage = "Path to the Pyrate folder";
-PR$PyLiePath::usage = "Path to the PyLie folder";
+GaugeField::usage = "Tag a field as a gauge field"
+PyrateRep::usage = "Tag a representation matrix in the Pyr@te representation matrix system";
 
 PyrateTag::usage = "Nature of the gauge factor; \!\(\*
 StyleBox[\"e\",\nFontSlant->\"Italic\"]\)\!\(\*
@@ -1368,16 +1357,26 @@ StyleBox[\".\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\"g\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\".\",\nFontSlant->\"Italic\"]\) U1, SU2, ...";
 
-WritePyRATE::usage="Main interface method of the FeynRules-PyR@te interface, generating a PyR@te model file";
+(* Enabling, loading and configuring the interface *)
 
-RunPyRATE::usage="Main interface method of the FeynRules-PyR@TE interface, externally calling PyR@TE to produce the RGEs of the model";
+DisablePyRATEInterface::usage = "Disable the interface between FeynRules and PyR@TE";
+EnablePyRATEInterface::usage = "Enable the interface between FeynRules and PyR@TE";
+ConfigurePyRATEInterface::usage = "Configure the PyR@TE interface";
+
+Python::usage = "Option of PR$SetPaths (Python path)";
+PyRATE::usage = "Option of PR$SetPaths (PyR@TE path)";
+
+(* Main functions *)
+
+WritePyRATE::usage = "Main interface method of the FeynRules-PyR@te interface, generating a PyR@te model file";
+RunPyRATE::usage = "Main interface method of the FeynRules-PyR@TE interface, externally calling PyR@TE to produce the RGEs of the model";
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Error messages and warnings*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*All messages*)
 
 
@@ -1645,7 +1644,7 @@ FormFactor::Vertex = "Warning: Form factor `1` appears in more than one vertex."
 FormFactor::VertexParticles = "Warning: Form factor `1` appears inside a vertex which does not match its Particle option.";
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*NLO*)
 
 
@@ -1655,18 +1654,18 @@ NLO::ExtMass = "Error : Not all the masses are external parameters.";
 NLO::OnShellMixing = "Error : OnshellMixing should be a classname of physical fields, a list of mixing physical fields or a list of those two types of elements.";
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Initialisation of the package*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Recursion limit*)
 
 
 Unprotect[$RecursionLimit];$RecursionLimit=2500;
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Initialisation of some FR system variables*)
 
 
@@ -1851,7 +1850,7 @@ FR$Dot[xx___, Power[s_?((ScalarFieldQ[#] && Not[GhostFieldQ[#] === True])&)[ind_
 FR$Dot[xx___, Power[del[s_?((ScalarFieldQ[#] && Not[GhostFieldQ[#] === True])&)[ind__], mu_],n_], yy___] := Power[del[s[ind], mu],n] FR$Dot[xx, yy]/; Length[{ind}] == Length[$IndList[s]];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*FieldExpand*)
 
 
@@ -1868,7 +1867,7 @@ Timer[expr_] := Block[{timelist},
     timelist[[2]]];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Loading the subroutines*)
 
 
@@ -1879,11 +1878,7 @@ $LocalFeynRulesPath = Global`$FeynRulesPath;
 Get[ToFileName[$LocalFeynRulesPath, "ToolBox.m"]];
 
 
-
-
-
-
-UpdateFRDistributedVariables[] :=    Block[{},
+UpdateFRDistributedVariables[] := Block[{},
    DistributeDefinitions[ParamList, IParamList, EParamList, MassList, WidthList, PartList, MR$Restrictions, ParamRules, MR$Definitions, NumericalValue, Mass, Width];
 ];
 
@@ -1925,7 +1920,6 @@ Block[{$Path = {$LocalFeynRulesPath,
     <<"FAToFR.m";
    
     (* Loading interfaces *)
-
 
     << "MadGraphInterface.m";
     << "SherpaInterface.m";
@@ -1971,7 +1965,7 @@ FRPalette[] := NotebookOpen[$FRPaletteAddress];
 EndPackage[];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Protection*)
 
 
@@ -1983,6 +1977,3 @@ Protect[LoadModel, FeynmanRules, ReadAll, FlavorExpand, MaxParticles, MinParticl
         MinCanonicalDimension, MaxCanonicalDimension, TeXOutput, WriteMGOutput, WriteSHOutput, WriteCHOutput, WriteFeynArtsOutput, ConservedQuantumNumbers, MASS, DECAY, 
         ZERO, NoUnfold, FRBlock, NoValue, NoPDG, NoBlockName, PutIndices, PrePutIndices, GetFieldContent, PrintLagrangian, FR$VersionNumber,FR$VersionDate,GenericFile,DiracIndices, 
         Sextet,FieldExpand,FR$FExpand]
-
-
-

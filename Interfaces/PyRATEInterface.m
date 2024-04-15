@@ -14,182 +14,380 @@
 
 
 (* ::Subsection::Closed:: *)
-(*Global variables initialisation*)
+(*Initialisation*)
 
 
 PR$PyratePath = "";
-PR$PyLiePath = "";
-PR$PythonPath = "";
+PR$PythonExecutable = "";
 
-
-PR$Config  = False;
-PR$Enabled = False;
-
-
-Protect[$MassDiag]$;
+PR$Path = FileNameJoin[{DirectoryName[$InputFileName], "PyRATE"}];
+PR$Configured = False;
 
 
 (* ::Subsection::Closed:: *)
-(*Useful functions*)
+(*Config file*)
 
 
-Options[LoadPaths] = {Muted->False};
+Options[UpdateConfigFile] = {
+	Enabled -> None,
+	PyRATEpath -> None,
+	PythonExecutable -> None
+};
 
-
-LoadPaths[PR$Path_,OptionsPattern[]] := Block[{configFileExists, s, invalid=False},
-	(* Has the interface been muted by the user? *)
-	If[FileExistsQ[FileNameJoin[{DirectoryName[$InputFileName], "FRPR_muted"}]], Return[], PR$Enabled=True];
-
-	(* Is the config file created ? *)
-	configFileExists = FileExistsQ[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]];
-	If[!configFileExists,
-		CreateConfigFile["", "", ""];
-	];
-	Get[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]];
-
-	If[!configFileExists || AllTrue[{PR$PythonPath, PR$PyratePath, PR$PyLiePath}, # == ""&],
-		Print[StringRepeat["-", 70]];
-		Print[Style["The FeynRules-PyR@TE interface cannot be loaded.",Darker[Orange]]];
-		Print["  ** Please provide paths to a valid Python's executable and to"];
-		Print["  ** PyR@TE's main directory, through the 'PR$SetPaths' function:"];
-		Print[Row[{"  ** \t", Style["PR$SetPaths[Python->[pythonPath], PyRATE->[PyR@TE 3 Folder]];",Darker[Green]]}]];
-		Print["  **\n  ** This needs to be done only once."];
-		Print["  ** If needed, you can call this function again"];
-		Print["  ** or directly modify "<>ToString[$FeynRulesPath]<>"/Interfaces/PyRATE/config.m\n  **"];
-		Print["  ** This message (and the whole interface) can be turned on/off through:"];
-		Print[Row[{"  ** \t", Style["DisableFeynRulesPyRATEInterface[];", Darker[Green]]}]];
-		Print[Row[{"  ** \t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
-		Print[StringRepeat["-", 70]];
-		Return[];
-	,
-		PR$Config = True;
+UpdateConfigFile[OptionsPattern[]] := Block[{fpath, config, enabled, pyratePath, pythonExec},
+	fpath = FileNameJoin[{PR$Path, "config.json"}];
+	{enabled, pyratePath, pythonExec} = {OptionValue@Enabled, OptionValue@PyRATEpath, OptionValue@PythonExecutable};
+	
+	If[!FileExistsQ[fpath],
+		config = Association["Enabled" -> False, "PyRATEpath" -> "", "PythonExecutable" -> ""];
+		Export[fpath, config];
 	];
 	
-	If[PR$PythonPath == "" || !FileExistsQ[PR$PythonPath],
-		invalid = True;
-		Print[Style["Error: Invalid Python executable path. Please set it correctly before going on.", Red]];
-	];
-	If[PR$PyratePath == "" || !FileExistsQ[PR$PyratePath],
-		invalid = True;
-		Print[Style["Error: Invalid PyR@TE directory. Please set it correctly before going on.", Red]];
+	If[{enabled, pyratePath, pythonExec} === {None, None, None},
+		Return[];
 	];
 	
-	(* Cleaning the mess if problems *)
-	If[invalid,
-		Print[Style["Please correctly setup the FeynRules-PyRATE interface:", Red]];
-		Print[Style["\t PR$SetPaths[Python->[pythonPath], PyRATE->[PyR@TE 3 Folder]];",Darker[Green]]];
-		DeleteFile[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]]; 
-		PR$Config = False;
-		Return[];
-	,
-		If[!OptionValue[Muted],
-			Print[Style["The FeynRules-PyR@TE interface has been loaded.", Darker[Orange]]];
-			Print[Style["Please cite arXiv:2107.NNNNN if using it.", Darker[Orange]]];
-		];
-		
-		If[$Output =!= {},
-			CheckDependencies[];
-		];
+	config = Association[Import[fpath]];
+	
+	If[enabled =!= None,
+		config[["Enabled"]] = enabled;
 	];
+	If[pyratePath =!= None,
+		config[["PyRATEpath"]] = pyratePath;
+	];
+	If[pythonExec =!= None,
+		config[["PythonExecutable"]] = pythonExec;
+	];
+	
+	Export[fpath, config];
+	LoadConfigFile[];
 ];
 
 
-CreateConfigFile[python_, pyrate_, pylie_] := Block[{s},
-	s = "(* :" <> ":Package:" <> ": *)\n";
-	s = s <> "(* :" <> ":Text:" <> ": *)\n";
-	s = s <> "(* This is a config file for the FeynRules - PyR@TE 3 interface. *)\n";
-	s = s <> "(* It contains the paths to Python's executable, PyR@TE and PyLie. *)\n\n";
-	s = s <> "PR$PythonPath = \"" <> python <> "\";\n";
-	s = s <> "PR$PyratePath = \"" <> pyrate <> "\";\n";
-	s = s <> "PR$PyLiePath = \"" <> pylie <> "\"\n";
-
-	WriteString[FileNameJoin[{PR$Path, "PyRATE", "config.m"}], s];
-	Close[FileNameJoin[{PR$Path, "PyRATE", "config.m"}]];
+GetConfigSetting[setting_] := Block[{fpath, config},
+	If[!MemberQ[{"Enabled", "PyRATEpath", "PythonExecutable"}, setting],
+		Print["Error: GetConfigSetting[]'s argument can only be '\"Enabled\"', \"PyRATEpath\" or \"PythonExecutable\"."];
+		Abort[];
+	];
+	
+	fpath = FileNameJoin[{PR$Path, "config.json"}];
+	
+	If[!FileExistsQ[fpath],
+		UpdateConfigFile[];
+	];
+	
+	config = Import[fpath];
+	
+	Return[Association[config][[setting]]];
 ]
 
 
-Options[PR$SetPaths] = {Python->"", PyRATE->""};
-PR$SetPaths[OptionsPattern[]] := Block[{python, pyrate},
-    (* Checking whether the interface is disabled *)
-	If[!PR$Enabled,
-		Print["Please first enable the FeynRules-PyR@TE interface:"];
-		Print[Row[{"  \t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
+LoadConfigFile[] := (
+	{PR$PyratePath, PR$PythonExecutable} = GetConfigSetting /@ {"PyRATEpath", "PythonExecutable"};
+);
+
+
+(* ::Subsection::Closed:: *)
+(*Enable / disable the interface*)
+
+
+PyRATEInterfaceEnabledQ[] := GetConfigSetting["Enabled"] === True;
+
+EnablePyRATEInterface[] := Block[{},
+	UpdateConfigFile[Enabled -> True];
+	
+	LoadPyRATEInterface[];
+];
+
+DisablePyRATEInterface[] := (UpdateConfigFile[Enabled -> False]; Print[Style["PyR@TE Interface was disabled.", Darker@Orange]]);
+
+
+(* ::Subsection::Closed:: *)
+(*Load the interface*)
+
+
+Options[LoadPyRATEInterface] = {Quiet -> False, Detail -> False};
+
+LoadPyRATEInterface[OptionsPattern[]] := Block[{pyrateConfigured, pythonConfigured, pythonValidated, configNeeded = False},
+	If[!PyRATEInterfaceEnabledQ[],
 		Return[];
 	];
-
-	If[OptionValue[Python] != "",
-		python = OptionValue[Python];
-		PR$PythonPath = python;
-	,
-		python = PR$PythonPath;
-	];
-	If[OptionValue[PyRATE] != "",
-		pyrate = OptionValue[PyRATE];
-		PR$PyratePath = pyrate;
-	,
-		pyrate = PR$PyratePath;
+	
+	If[!OptionValue[Quiet] && !OptionValue[Detail],
+		Print[Style["Loading PyR@TE Interface...", Darker@Orange]];
 	];
 	
-	CreateConfigFile[python, pyrate, FileNameJoin[{PR$PyratePath, "src", "PyLie"}]];
-	LoadPaths[PR$Path,Muted->True];
+	(* Read the config file *)
+	LoadConfigFile[];
+	
+	pyrateConfigured = ValidPyRATEpathQ[PR$PyratePath];
+	pythonConfigured = ValidPythonExecutableQ[PR$PythonExecutable];
+	
+	If[!pyrateConfigured,
+		configNeeded = True;
+		
+		If[!OptionValue[Quiet],
+			Print[Style["\t* No valid path to PyR@TE 3's main folder is currently provided.", Red]];
+			
+			Print[Style["\t  * Option 1:", Darker@Orange, Bold], " you may call the function ", Style["ConfigurePyRATEInterface[]", Bold],
+					" with the option ", Style["PyRATE->Automatic", Bold], ". The bash command"];
+			Print["\t\t              'git clone https://github.com/LSartore/pyrate.git $dirpath/$dirname'"];
+			Print["\t              will be automatically run, where $dirpath = $FeynrulesPath/Interfaces/PyRATE and $dirname = \"PyR@TE_3\" by default."];
+			Print["\t              If needed, $dirpath and $dirname can be provided using the options ",
+					Style["GitCloneDirectory", Bold], " and ", Style["GitCloneDirectoryName", Bold], ", respectively."];
+			
+			Print[Style["\t  * Option 2:", Darker@Orange, Bold], " you may manually download PyR@TE 3 and provide its path calling the function"];
+			Print["\t\t          ", Style["ConfigurePyRATEInterface[PyRATE->", Bold], "[path to PyR@TE 3's main directory]", Style["]", Bold], "."];
+		];
+	];
+	
+	If[!pythonConfigured,
+		configNeeded = True;
+		
+		If[!pyrateConfigured && !OptionValue[Quiet],
+			Print[""];
+		];
+		
+		If[!OptionValue[Quiet],
+			Print[Style["\t* No valid python executable is currently provided.", Red]];
+			
+			Print[Style["\t  * Option 1:", Darker@Orange, Bold], " you may call the function ", Style["ConfigurePyRATEInterface[]", Bold],
+					" with the option ", Style["Python->Automatic", Bold], ". It will be checked whether"];
+			Print["\t              either 'python' or 'python3' corresponds to a valid python executable on your machine."];
+			
+			Print[Style["\t  * Option 2:", Darker@Orange, Bold], " you may manually specify the absolute path to a python 3 executable using"];
+			Print["\t\t          ", Style["ConfigurePyRATEInterface[Python->", Bold], "[path to a valid python executable]", Style["]", Bold], "."];
+		];
+	];
+	
+	If[configNeeded,
+		Return[];
+	];
+	
+	If[!OptionValue[Quiet],
+		Print[Style["Done.", Darker@Orange]];
+	];
+	
+	PR$Configured = True;
+	Return[True];
 ];
 
 
 (* ::Subsection::Closed:: *)
-(*Functions allowing to enable and disable the FeynRules-PyR@TE interface*)
+(*Configure the interface*)
 
 
-DisableFeynRulesPyRATEInterface[]:= Block[{myfile=FileNameJoin[{Global`$FeynRulesPath, "Interfaces","FRPR_muted"}]},
-  Print["Disabling the FeynRules-PyR@TE interface..."];
-  WriteString[myfile,""];
-  PR$Enabled=False;
+Options[ConfigurePyRATEInterface] = {
+	PyRATE -> None, Python -> None,
+	GitCloneDirectory -> Automatic, GitCloneDirectoryName -> "PyR@TE_3", ForceGitClone -> False
+};
+
+ConfigurePyRATEInterface[OptionsPattern[]] := Block[{pyrate, python, gcpath, gcfolder, cloned, pythonDep},
+	If[!PyRATEInterfaceEnabledQ[],
+		Print["Please enable the Feynrules-PyR@TE interface by running ", Style["EnablePyRATEInterface[]", Bold], " before configuring it."];
+		Return[];
+	];
+	
+	{pyrate, python, gcpath, gcfolder} = {OptionValue@PyRATE, OptionValue@Python, OptionValue@GitCloneDirectory, OptionValue@GitCloneDirectoryName};
+
+	If[pyrate =!= None,
+		If[pyrate === Automatic,
+			(* Automatic git cloning *)
+			
+			If[gcpath === Automatic,
+				gcpath = PR$Path;
+			];
+			
+			If[!StringQ[gcpath] || !FileExistsQ[gcpath] || !DirectoryQ[gcpath],
+				Print[Style["Error: the directory path provided through the GitCloneDirectory option appears to be invalid (" <> gcpath <> ")", Red]];
+				Return[];
+			];
+		
+			If[!StringQ[gcfolder],
+				Print[Style["Error: the directory name provided through the GitCloneDirectoryName option must be a string.", Red]];
+				Return[];
+			];
+			
+			pyrate = AutoGitClone[gcpath, gcfolder, ForceGitClone -> OptionValue[ForceGitClone]];
+			
+			If[pyrate === False,
+				Return[];
+			];
+			
+			UpdateConfigFile[PyRATEpath -> pyrate];
+		,
+			If[!ValidPyRATEpathQ[pyrate],
+				Print["Error: the path provided through the PyRATE option should point to a valid PyR@TE 3 directory."];
+				Return[];
+			];
+		];
+	];
+	
+	If[python =!= None,
+		If[!ValidPyRATEpathQ[pyrate],
+			Print[Style["Warning: skipping python executable configuration. A valid path to PyR@TE 3 must first be provided.", Orange]];
+			Return[];
+		];
+		
+		If[python === Automatic,
+			(* Automatic python executable testing *)
+			
+			python = AutoPythonConfig[];
+			
+			If[python === False,
+				Return[];
+			];
+			
+			UpdateConfigFile[PythonExecutable -> python];
+		,
+			If[!ValidPythonExecutableQ[python],
+				Print[Style["Error: the string provided through the Python option doesn't correspond to a valid python executable.", Red]];
+				Return[];
+			,
+				pythonDep = CheckPythonDependencies[python];
+				
+				If[pythonDep =!= True,
+					Print[Style["Error: the string provided through the Python option does correspond to a valid python executable", Red]];
+					Print[Style["but fails to meet PyR@TE 3's dependency requirements:", Red]];
+					Print[Style[pythonDep, FontFamily->"Courier"]];
+					
+					Return[];
+				];
+				
+				UpdateConfigFile[PythonExecutable -> python];
+			];
+		];
+	];
+	
+	If[LoadPyRATEInterface[Quiet -> True] === True,
+		Print[Style["The PyR@TE interface is properly configured and loaded.", Darker@Green]];
+	];
 ];
 
 
-EnableFeynRulesPyRATEInterface[]:=Block[{myfile=FileNameJoin[{Global`$FeynRulesPath, "Interfaces","FRPR_muted"}]}, 
-  Print["Enabling the FeynRules-PyR@TE interface..."];
-  If[FileExistsQ[myfile], DeleteFile[myfile]]; 
-  PR$Path = Global`$FeynRulesPath<>"/Interfaces";
-  PR$Enabled = True;
-  LoadPaths[PR$Path];
+PyRATEInterfaceConfiguredQ[] := PyRATEInterfaceEnabledQ[] && ( LoadPyRATEInterface[Quiet -> True] === True );
+
+
+CheckInterfaceConfiguration[] := If[PyRATEInterfaceConfiguredQ[], Return[True], Print[Style["Error: the PyR@TE interface is not properly configured.", Bold, Red]]; LoadPyRATEInterface[Quiet -> False, Detail -> True]; Abort[];];
+
+
+(* ::Subsection::Closed:: *)
+(*PyR@TE path config*)
+
+
+ValidPyRATEpathQ[path_] := StringQ[path] && path =!= "" && FileExistsQ[path] && DirectoryQ[path] && FileExistsQ[FileNameJoin[{path, "pyR@TE.py"}]];
+
+
+Options[AutoGitClone] = {ForceGitClone -> False};
+
+AutoGitClone[path_, name_, OptionsPattern[]] := Block[{dir, autogit, gitcmd, procReturn},
+	dir = FileNameJoin[{path, name}];
+	
+	If[FileExistsQ[dir] && DirectoryQ[dir],
+		If[!OptionValue[ForceGitClone],
+			If[ValidPyRATEpathQ[dir],
+				Return[dir];
+			];
+			
+			Print[Style["Error while git-cloning PyR@TE 3:", Red], " the provided directory already exists (", dir, ")."];
+			Print["You may run ", Style["ConfigureInterface[ForceGitClone->True]", Bold], " to overwrite its content."];
+			Return[False];
+		,
+			DeleteDirectory[dir, DeleteContents->True];
+		];
+	];
+	
+	gitcmd = {"git", "clone", "https://github.com/LSartore/pyrate.git", dir};
+	
+	Print[Style["Cloning PyR@TE 3 from \n\thttps://github.com/LSartore/pyrate.git\nto\n\t" <> dir <> "...", Darker@Orange]];
+	
+	procReturn = RunProcess[gitcmd];
+	
+	If[procReturn === $Failed,
+		Print[Style["Error: unable to automatically clone PyR@TE's git repository.", Red]];
+		Return[False];
+	];
+	
+	If[procReturn[["ExitCode"]] =!= 0,
+		Print[Style["Error: unable to automatically clone PyR@TE's git repository.", Red]];
+		Print[Style["The command ", Red]];
+		Print["\t", Style[StringRiffle[gitcmd], Red, Bold]];
+		Print[Style["has generated the following error message:", Red]];
+		Print[Style[procReturn[["StandardError"]], FontFamily->"Courier", Red]];
+		
+		Return[False];
+	];
+	
+	Print[Style["Done.", Darker@Orange]];
+	Return[dir];
 ];
 
 
 (* ::Subsection::Closed:: *)
-(*Python dependencies check*)
+(*Python executable config*)
 
 
-CheckDependencies[] := Block[{dependencyScriptPath, logPath, mess},
+Options[ValidPythonExecutableQ] = {SkipDependencyCheck -> False};
+
+ValidPythonExecutableQ[pexec_, OptionsPattern[]] := Block[{out},
+	If[pexec === "" || !StringQ[pexec],
+		Return[False];
+	];
+	
+	out = Quiet @ Check[RunProcess[{pexec, "-V"}], False];
+	
+	Return[out =!= False && out[["ExitCode"]] == 0];
+]
+
+
+AutoPythonConfig[] := Block[{pyexecList = {"python", "python3"}, validexecList, validDependencies, summary, validExecPos},
+	validexecList = ValidPythonExecutableQ /@ pyexecList;
+	validDependencies = Table[If[validexecList[[i]] === False, False, CheckPythonDependencies[pyexecList[[i]]]], {i, Length@pyexecList}];
+	
+	summary = Transpose[{pyexecList, validexecList, validDependencies}];
+
+	validExecPos = FirstPosition[summary, {_, True, True}, 0];
+	
+	If[validExecPos == 0,
+		Print[Style["Error: Unable to automatically find a valid python executable.", Red]];
+		Do[
+			If[s[[2]] === True,
+				Print["\t* ", Style[s[[1]], Bold], " is a valid python executable but has missing dependencies:"];
+				Print[Style[s[[3]], FontFamily->"Courier"]];
+			,
+				Print["\t* ", Style[s[[1]], Bold], " is not a valid python executable."];
+			];
+		, {s, summary}];
+		
+		Return[False];
+	];
+	
+	Return[pyexecList[[validExecPos[[1]]]]];
+];
+
+
+CheckPythonDependencies[exec_] := Block[{dependencyScriptPath, out, logPath, mess},
 	dependencyScriptPath = FileNameJoin[{PR$PyratePath, "src", "IO", "Dependencies.py"}];
 	
-	If[Run[PR$PythonPath <> " " <> dependencyScriptPath] == 0, Return[]];
+	out = RunProcess[{exec, dependencyScriptPath}];
 	
-	logPath = FileNameJoin[{PR$PyratePath, "log", "dependencies.log"}];
-	
-	If[!FileExistsQ[logPath],
-		Print[StringRepeat["-", 70]];
-		Print[Style["Error: unable to check PyR@TE 3's dependencies.", Red]];
-		Print[Style["Please make sure that PR$PythonPath corresponds to a valid Python3", Red]];
-		Print[Style["executable and that you are using the most recent version of PyR@TE 3.", Red]];
-		Print[StringRepeat["-", 70]];
-		Return[];
+	If[out[["ExitCode"]] === 0,
+		Return[True];
 	];
-	
+
+	logPath = FileNameJoin[{PR$PyratePath, "log", "dependencies.log"}];
 	mess = Import[logPath, "Text"];
 	DeleteFile[logPath];
 	
-	Print[StringRepeat["-", 70]];
-	Print[Style[mess, Red]];
-	Print[StringRepeat["-", 70]];
+	Return[mess];
 ]
 
 
 (* ::Subsection::Closed:: *)
-(*Initialization code*)
+(*Actually loading the interface*)
 
 
-PR$Path = DirectoryName[$InputFileName];
-LoadPaths[PR$Path];
+LoadPyRATEInterface[]
 
 
 (* ::Section::Closed:: *)
@@ -3440,7 +3638,7 @@ WritePyRATE[lags__, opt:OptionsPattern[]] := WritePyRATE[{lags}, Evaluate @ opt]
 
 WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagPartsNoHC, lagTerms, lagTermsNoHC, sortingFunction},
 	(* Check wether the interface is enabled / configured *)
-	If[!PR$Enabled, 
+	(*If[!PR$Enabled, 
 		Print[Style["Error: Please enable the FeynRules-PyR@ATE interface.",Red]]; 
 		Print[Row[{"\t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
 		Return[]
@@ -3449,7 +3647,8 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 		Print[Style["Error: Please configure the interface before going on.",Red]];
 		Print[Row[{"\t", Style["PR$SetPaths[Python->[pythonPath], PyRATE->[PyR@TE 3 Folder]];",Darker[Green]]}]];
 		Return[]
-	];
+	];*)
+	CheckInterfaceConfiguration[];
 	
 	Print[Style["Generating the PyR@TE model file", Bold, Orange]];
 	(* Retrieve info on groups, fermions & scalars *)
@@ -3539,10 +3738,7 @@ Options[RunPyRATE] = {
 
 
 RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrateOut = False, pyrateResultsDir, fullCommand, args, loop, output, ret, ascentFolder, ascentTarget},
-	If[!PR$Config,
-		Print["Error: Please configure the interface before going on."];
-		Return[];
-	];
+	CheckInterfaceConfiguration[];
 	If[PR$ModelFile === Unevaluated[PR$ModelFile] || PR$ModelFile == "", Print["Please produce a PyR@TE model file using WritePyRATE[] before running."]; Return[]];
 	If[!FileExistsQ[PR$ModelFile], Print["Error: the PyR@TE model file does not exist (provided path was '" <> PR$ModelFile <> "')."]; Return[]];
 	
