@@ -9,16 +9,17 @@
 (*Version : 1.0  --  March 2024 *)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Load / configure the interface*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Initialisation*)
 
 
 PR$PyratePath = "";
 PR$PythonExecutable = "";
+PR$PyLiePath := FileNameJoin[{PR$PyratePath, "src", "pylie"}];
 
 PR$Path = FileNameJoin[{DirectoryName[$InputFileName], "PyRATE"}];
 PR$Configured = False;
@@ -390,7 +391,7 @@ CheckPythonDependencies[exec_] := Block[{dependencyScriptPath, out, logPath, mes
 LoadPyRATEInterface[]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Interacting with PyLie and PyR@TE*)
 
 
@@ -425,7 +426,7 @@ DB[el_:Nothing] := Block[{DBcontent, dbFile, missingDBfile = False},
 
 
 DBCompute[gp_, request_, arg_:None, kwargs_:None] := Block[{formatedArg, formatedKWargs, command, exitCode},
-	command = PR$PythonPath <> " " <> FileNameJoin[{PR$PyLiePath, "dbRequest.py"}];
+	command = PR$PythonExecutable <> " " <> FileNameJoin[{PR$PyLiePath, "dbRequest.py"}];
 	command = command <> " " <> PR$PyLiePath;
 	
 	command = command <> " " <> ToString[gp];
@@ -3614,7 +3615,7 @@ PR$WriteASperGe[ufoFolder_, lag_] := Block[{dirname, location, interfacedir, mix
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Main functions*)
 
 
@@ -3721,7 +3722,7 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*RunPyRATE*)
 
 
@@ -3786,7 +3787,7 @@ RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrate
 	pyrateResultsDir = FileNameJoin[{DirectoryName[PR$ModelFile], "results"}];
 
 	(* Prepare the run command *)
-	fullCommand = PR$PythonPath <> " " <> FileNameJoin[{PR$PyratePath, "pyR@TE.py"}];
+	fullCommand = PR$PythonExecutable <> " " <> FileNameJoin[{PR$PyratePath, "pyR@TE.py"}];
 
 	args = {"-m", PR$ModelFile, "-log", "-res", pyrateResultsDir, "--CreateFolder",  "False", "-lcpp", DirectoryName[PR$MainASperGePath], "--LightCppSolverOnly"};
 	If[OptionValue[SkipGaugeInvarianceCheck] === True, args = Append[args, "-no-gi"]];
