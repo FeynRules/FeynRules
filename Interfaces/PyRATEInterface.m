@@ -221,6 +221,8 @@ ConfigurePyRATEInterface[OptionsPattern[]] := Block[{pyrate, python, gcpath, gcf
 				Print["Error: the path provided through the PyRATE option should point to a valid PyR@TE 3 directory."];
 				Return[];
 			];
+			
+			UpdateConfigFile[PyRATEpath -> pyrate];
 		];
 	];
 	
