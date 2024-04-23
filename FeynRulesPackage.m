@@ -1363,8 +1363,11 @@ DisablePyRATEInterface::usage = "Disable the interface between FeynRules and PyR
 EnablePyRATEInterface::usage = "Enable the interface between FeynRules and PyR@TE";
 ConfigurePyRATEInterface::usage = "Configure the PyR@TE interface";
 
-Python::usage = "Option of PR$SetPaths (Python path)";
-PyRATE::usage = "Option of PR$SetPaths (PyR@TE path)";
+Python::usage = "Option of ConfigurePyRATEInterface; allows to manually provide a Python executable";
+PyRATE::usage = "Option of ConfigurePyRATEInterface; allows to manually provide the path to PyR@TE 3";
+GitCloneDirectory::usage = "Option of ConfigurePyRATEInterface; allows to specify the directory under which PyR@TE 3 should be cloned";
+GitCloneDirectoryName::usage = "Option of ConfigurePyRATEInterface; allows to specify the name of PyR@TE 3's cloned main directory";
+ForceGitClone::usage = "Option of ConfigurePyRATEInterface; allows to force PyR@TE 3 cloning operation (in particular if the directory already exists)";
 
 (* Main functions *)
 
