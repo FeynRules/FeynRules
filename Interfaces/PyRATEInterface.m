@@ -19,7 +19,7 @@
 
 PR$PyratePath = "";
 PR$PythonExecutable = "";
-PR$PyLiePath := FileNameJoin[{PR$PyratePath, "src", "pylie"}];
+PR$PyLiePath := FileNameJoin[{PR$PyratePath, "src", "PyLie"}];
 
 PR$Path = FileNameJoin[{DirectoryName[$InputFileName], "PyRATE"}];
 PR$Configured = False;
