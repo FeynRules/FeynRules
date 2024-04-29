@@ -250,38 +250,17 @@ class Coupling(UFOBaseClass):
     def pole(self, x):
         """ the self.value attribute can be a dictionary directly specifying the Laurent serie using normal
         parameter or just a string which can possibly contain CTparameter defining the Laurent serie."""
-        
+
         if isinstance(self.value,dict):
             if -x in self.value.keys():
                 return self.value[-x]
             else:
                 return 'ZERO'
-
-        CTparam=None
-        for param in all_CTparameters:
-           pattern=re.compile(r"(?P<first>\A|\*|\+|\-|\()(?P<name>"+param.name+r")(?P<second>\Z|\*|\+|\-|\))")
-           numberOfMatches=len(pattern.findall(self.value))
-           if numberOfMatches==1:
-               if not CTparam:
-                   CTparam=param
-               else:
-                   raise UFOError, "UFO does not support yet more than one occurence of CTParameters in the couplings values."
-           elif numberOfMatches>1:
-               raise UFOError, "UFO does not support yet more than one occurence of CTParameters in the couplings values."
-
-        if not CTparam:
-            if x==0:
-                return self.value
-            else:
-                return 'ZERO'
+        if x==0:
+            return self.value
         else:
-            if CTparam.pole(x)=='ZERO':
-                return 'ZERO'
-            else:
-                def substitution(matchedObj):
-                    return matchedObj.group('first')+"("+CTparam.pole(x)+")"+matchedObj.group('second')
-                pattern=re.compile(r"(?P<first>\A|\*|\+|\-|\()(?P<name>"+CTparam.name+r")(?P<second>\Z|\*|\+|\-|\))")
-                return pattern.sub(substitution,self.value)
+            return 'ZERO'
+
 
 all_lorentz = []
 
@@ -371,3 +350,17 @@ class Propagator(UFOBaseClass):
 
         global all_propagators
         all_propagators.append(self)
+
+
+all_running_elements = []
+
+class Running(UFOBaseClass):
+
+    require_args = ['name','run_objects','value']
+
+    def __init__(self, name, run_objects, value, **opt):
+        args = (name, run_objects, value)
+        UFOBaseClass.__init__(self, *args, **opt)
+
+        global all_running_elements
+        all_running_elements.append(self)
