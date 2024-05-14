@@ -9,11 +9,11 @@
 (*Version : 1.0  --  March 2024 *)
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Load / configure the interface*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Initialisation*)
 
 
@@ -393,7 +393,7 @@ CheckPythonDependencies[exec_] := Block[{dependencyScriptPath, out, logPath, mes
 LoadPyRATEInterface[]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Interacting with PyLie and PyR@TE*)
 
 
@@ -3729,6 +3729,7 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 
 
 Options[RunPyRATE] = {
+	Model -> Automatic,
 	UFOFolder    -> None, (* Relative or absolute path *)
 	PyRATEOutput -> Automatic, (* Automatic / True / False *)
 
@@ -3740,10 +3741,22 @@ Options[RunPyRATE] = {
 };
 
 
-RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrateOut = False, pyrateResultsDir, fullCommand, args, loop, output, ret, ascentFolder, ascentTarget},
+RunPyRATE[OptionsPattern[]] := Block[
+{model, ufoOut = False, ufoDir, mainUfoDir, pyrateOut = False, pyrateResultsDir, fullCommand, args, loop, output, ret, ascentFolder, ascentTarget},
 	CheckInterfaceConfiguration[];
-	If[PR$ModelFile === Unevaluated[PR$ModelFile] || PR$ModelFile == "", Print["Please produce a PyR@TE model file using WritePyRATE[] before running."]; Return[]];
-	If[!FileExistsQ[PR$ModelFile], Print["Error: the PyR@TE model file does not exist (provided path was '" <> PR$ModelFile <> "')."]; Return[]];
+	
+	model = If[OptionValue[Model] === Automatic, PR$ModelFile, OptionValue[Model]];
+	
+	If[OptionValue[Model] === Automatic && PR$ModelFile === Unevaluated[PR$ModelFile],
+		Print["Please first produce a PyR@TE model file using WritePyRATE[]."];
+		Print["It is also possible to run PyR@TE using an existing model file, using"];
+		Print["\t", Style["RunPyRATE[Model -> ", Bold], "<Path to PyR@TE model file>", Style["].", Bold]];
+		Return[];
+	];
+	If[!FileExistsQ[model],
+		Print["Error: the PyR@TE model file does not exist (provided path was '" <> model <> "')."];
+		Return[];
+	];
 	
 	If[OptionValue[UFOFolder] =!= None,
 		ufoOut = True;
@@ -3827,9 +3840,9 @@ RunPyRATE[OptionsPattern[]] := Block[{ufoOut = False, ufoDir, mainUfoDir, pyrate
 
 		If[pyrateOut === False,
 			(* Copy the PyR@TE model file to the UFO directory to keep track of how RGEs were computed *)
-			CopyFile[PR$ModelFile, FileNameJoin[{ParentDirectory@DirectoryName[PR$MainASperGePath], FileNameTake[PR$ModelFile]}]];
-			DeleteFile[PR$ModelFile];
-			DeleteDirectory[DirectoryName[PR$ModelFile]];
+			CopyFile[model, FileNameJoin[{ParentDirectory@DirectoryName[PR$MainASperGePath], FileNameTake[model]}]];
+			(*DeleteFile[model];
+			DeleteDirectory[DirectoryName[model]];*)
 		];
 
 		ascentFolder = FileNameJoin[{PR$PyratePath, "src", "IO", "include", "ascent"}];
