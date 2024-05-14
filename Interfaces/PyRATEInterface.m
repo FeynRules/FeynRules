@@ -3517,12 +3517,12 @@ void diagonalize(double* externals, double* res)
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Append RGE solving functions to the main ASperGe file*)
 
 
 CppRGESolving[] := Block[{mainstream, nl=ToString[PR$loops], runningExternals, runningPos, pad, runningPosStr, runningPosErr},
-	runningExternals = GetRealRunningComponents[PR$GaugeGroups, PR$Yukawas, PR$Quartics, PR$Trilinears, PR$ScalarMasses, PR$FermionMasses];
+	runningExternals = DeleteDuplicates[GetRealRunningComponents[PR$GaugeGroups, PR$Yukawas, PR$Quartics, PR$Trilinears, PR$ScalarMasses, PR$FermionMasses] /. Conjugate -> Identity];
 	runningPos = Check[Position[PR$allExternals, #][[1,1]]-1, {#, False}]& /@ runningExternals;
 	runningPosErr = Cases[runningPos, {x_, False} :> x];
 	
