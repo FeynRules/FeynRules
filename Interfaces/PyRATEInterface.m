@@ -897,7 +897,7 @@ ReadOutput[] := Block[{newLogFiles, log, content},
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Useful functions*)
 
 
@@ -1629,7 +1629,7 @@ FindYukawaCoeff[coeffList_, conj_:False] := Block[{parList, yukPos},
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Parameters*)
 
 
@@ -2218,7 +2218,7 @@ SetRule[x_, rule_, newValue_] := Replace[x, HoldPattern[rule -> _] :> (rule -> n
 SetRules[x_, rules_List, newValues_List] := Replace[x, MapThread[(HoldPattern[#1 -> _] :> (#1 -> #2))&, {rules, newValues}], 1]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Getting info from FR model*)
 
 
@@ -2566,7 +2566,7 @@ GetUFOMapping[] := Block[{mappingList = {}, ParamMapping, iNames, iRanges, allEl
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*GetRunningCouplings*)
 
 
@@ -2607,7 +2607,7 @@ GetRealRunningComponents[ggList_, yList_:{}, qList_:{}, tList_:{}, smList_:{}, f
 ]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Writing the model file*)
 
 
@@ -2906,7 +2906,7 @@ WriteCouplings[ggList_, yList_:{}, qList_:{}, tList_:{}, smList_:{}, fmList_:{}]
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Modified ASperGE interface*)
 
 
@@ -3108,7 +3108,7 @@ MassPositionFromPDG[pdg_] := Block[{res},
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Write the files*)
 
 
@@ -3278,7 +3278,7 @@ class Parameters
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Define the mass matrices*)
 
 
@@ -3517,7 +3517,7 @@ void diagonalize(double* externals, double* res)
 ];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Append RGE solving functions to the main ASperGe file*)
 
 
@@ -3630,7 +3630,7 @@ PR$WriteASperGe[ufoFolder_, lag_] := Block[{dirname, location, interfacedir, mix
 (*Main functions*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*WritePyRATE*)
 
 
@@ -3649,17 +3649,6 @@ WritePyRATE[lags__, opt:OptionsPattern[]] := WritePyRATE[{lags}, Evaluate @ opt]
 
 
 WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagPartsNoHC, lagTerms, lagTermsNoHC, sortingFunction},
-	(* Check wether the interface is enabled / configured *)
-	(*If[!PR$Enabled, 
-		Print[Style["Error: Please enable the FeynRules-PyR@ATE interface.",Red]]; 
-		Print[Row[{"\t", Style["EnableFeynRulesPyRATEInterface[]; ", Darker[Green]]}]];
-		Return[]
-	];
-	If[!PR$Config,
-		Print[Style["Error: Please configure the interface before going on.",Red]];
-		Print[Row[{"\t", Style["PR$SetPaths[Python->[pythonPath], PyRATE->[PyR@TE 3 Folder]];",Darker[Green]]}]];
-		Return[]
-	];*)
 	CheckInterfaceConfiguration[];
 	
 	Print[Style["Generating the PyR@TE model file", Bold, Orange]];
@@ -3733,7 +3722,7 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*RunPyRATE*)
 
 
@@ -3787,9 +3776,9 @@ RunPyRATE[OptionsPattern[]] := Block[
 		Return[];
 	];
 	If[ufoOut === True,
-		ufoDir = Check[AbsoluteFileName[OptionValue[UFOFolder]], False];
+		ufoDir = Quiet@Check[AbsoluteFileName[OptionValue[UFOFolder]], False];
 		If[ufoDir === False,
-			Print["Error: option 'UFOFolder' corresponds to an invalid path."];
+			Print["Error: option 'UFOFolder' corresponds to an invalid path: ", FileNameJoin[{Directory[], OptionValue[UFOFolder]}]];
 			Abort[];
 		];
 		
