@@ -897,7 +897,7 @@ ReadOutput[] := Block[{newLogFiles, log, content},
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Useful functions*)
 
 
@@ -1629,7 +1629,7 @@ FindYukawaCoeff[coeffList_, conj_:False] := Block[{parList, yukPos},
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Parameters*)
 
 
@@ -2218,7 +2218,7 @@ SetRule[x_, rule_, newValue_] := Replace[x, HoldPattern[rule -> _] :> (rule -> n
 SetRules[x_, rules_List, newValues_List] := Replace[x, MapThread[(HoldPattern[#1 -> _] :> (#1 -> #2))&, {rules, newValues}], 1]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Getting info from FR model*)
 
 
@@ -2566,7 +2566,7 @@ GetUFOMapping[] := Block[{mappingList = {}, ParamMapping, iNames, iRanges, allEl
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*GetRunningCouplings*)
 
 
@@ -2607,7 +2607,7 @@ GetRealRunningComponents[ggList_, yList_:{}, qList_:{}, tList_:{}, smList_:{}, f
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Writing the model file*)
 
 
@@ -2906,7 +2906,7 @@ WriteCouplings[ggList_, yList_:{}, qList_:{}, tList_:{}, smList_:{}, fmList_:{}]
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Modified ASperGE interface*)
 
 
@@ -3108,7 +3108,7 @@ MassPositionFromPDG[pdg_] := Block[{res},
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Write the files*)
 
 
@@ -3278,7 +3278,7 @@ class Parameters
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Define the mass matrices*)
 
 
@@ -3533,7 +3533,8 @@ CppRGESolving[] := Block[{mainstream, nl=ToString[PR$loops], runningExternals, r
 	
 	pad = StringRepeat[" ", 32];
 	runningPosStr = "{" <> StringReplace[StringRiffle[Riffle[ToString /@ runningPos, "\n" <> pad, 11], ","], ("\n" <> pad <> ",") -> ("\n" <> pad)] <> "}";
-
+	
+	Print["[DEBUG] Writing RGE file in ", PR$MainASperGePath];
 	mainstream = OpenAppend[PR$MainASperGePath];
 
 	WriteString[mainstream,
@@ -3561,8 +3562,16 @@ int runAndDiagonalize(double* externals, double* res, double t0, double t1, doub
     }
 
     // Call the RGE solver
-    if(step == 0)
-        step = (t1-t0)/15.;
+
+    if(step == 0) // Set the step to some default value
+    {
+    	if(t1 > t0){
+        	step = (t1-t0)/15.;
+        }
+        else{
+        	step = (t0-t1)/15.;
+        }
+    }
 
     landau = ppsolver(t0, t1, step, initialCouplings, runExternals, "<>nl<>", "<>nl<>", "<>nl<>");
 
@@ -3621,7 +3630,7 @@ PR$WriteASperGe[ufoFolder_, lag_] := Block[{dirname, location, interfacedir, mix
 (*Main functions*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*WritePyRATE*)
 
 
@@ -3715,7 +3724,7 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 	PR$Trilinears = SortBy[FactorPotentialTerms[PR$Trilinears], sortingFunction];
 	PR$ScalarMasses = SortBy[FactorPotentialTerms[PR$ScalarMasses], sortingFunction];
 	PR$FermionMasses = SortBy[FactorPotentialTerms[PR$FermionMasses], sortingFunction];
-
+	
 	PR$ModelFile = WriteAll[OptionValue[OutputFolder], OptionValue[Latex],
 							 PR$GaugeGroups, PR$Fermions, PR$Scalars,
 							 PR$Yukawas, PR$Quartics, PR$Trilinears, PR$ScalarMasses, PR$FermionMasses];
@@ -3724,7 +3733,7 @@ WritePyRATE[{lags___}, OptionsPattern[]] := Block[{iLag, err, lagParts, lagParts
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*RunPyRATE*)
 
 
