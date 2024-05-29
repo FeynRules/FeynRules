@@ -318,7 +318,7 @@ PutUndefinedMassesToZERO[particles_] := Block[{MyAspergeMasses={},
 
    (* Define the Asperge masses *)
    If[M$MixingsDescription=!={},
-     MyAspergeMasses=DeleteCases[PDGToMass/@CalculatePDGFLR/@Flatten[(MassBasis/.#)&/@M$MixingsDescription[[All,2]]],PDGToMass[_]];
+     MyAspergeMasses=DeleteCases[PDGToMass/@CalculatePDGFLR/@Select[Flatten[(MassBasis/.#)&/@M$MixingsDescription[[All,2]]],WeylFieldQ[#]=!=True&],PDGToMass[_]];
     ];
 
 

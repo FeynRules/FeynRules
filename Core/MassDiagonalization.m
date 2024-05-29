@@ -476,7 +476,7 @@ CreateCCRule[rule_]:=Block[{newrule,MyCC,MyMod,MyRuleDelayed,MyRule},
 
 RotateVector[mbasis_,gbasis_,Val_]:=Block[{rule,MyModule},
   (* From mass to gauge basis *)
-  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val.gbasis],List];
+  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val . gbasis],List];
   rule=rule/.MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True && $IndList[#]==={}&):>fiel-(fiel/.FR$vevRules/.fiel->0)]]/.
     MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True&)[argus__]:>fiel[argus]- (fiel[argus]/.FR$vevRules/.fiel[argus]->0)]];
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
@@ -485,7 +485,7 @@ RotateVector[mbasis_,gbasis_,Val_]:=Block[{rule,MyModule},
   FR$ToGaugeBasis=DeleteDuplicates[Join[FR$ToGaugeBasis,rule]];
 
   (* From gauge to mass basis *)
-  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val].mbasis],List];
+  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val] . mbasis],List];
   rule=rule/.{MyRule[a_?(Head[#]===Symbol&),b_]:>MyRule[a,(a/.FR$vevRules/.a->0)+b],MyRule[a_[indx__],b_]:>MyRule[a[indx],(a[indx]/.FR$vevRules/.a[indx]->0)+b]};
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule=rule/.MyRule->Rule/.MyModule->Module;
@@ -503,7 +503,7 @@ RotateVector[mbasis_,gbasis_,Val_]:=Block[{rule,MyModule},
 
 RotateScalar[mbasis_,gbasis_,Val_]:=Block[{rule,MyModule},
 (* From mass to gauge basis *)
-  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val.gbasis],List];
+  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val . gbasis],List];
   rule=rule/.MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True && $IndList[#]==={}&):>(fiel+anti[fiel]- 2 (fiel/.FR$vevRules/.fiel->0))/Sqrt[2]]]/.
        MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True&)[argus__]:>(fiel[argus]+anti[fiel][argus]-2(fiel[argus]/.FR$vevRules/.fiel[argus]->0))/Sqrt[2]]];
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
@@ -512,7 +512,7 @@ RotateScalar[mbasis_,gbasis_,Val_]:=Block[{rule,MyModule},
   FR$ToGaugeBasis=DeleteDuplicates[Join[FR$ToGaugeBasis,rule]];
 
   (* From gauge to mass basis *)
-  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val].mbasis],List];
+  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val] . mbasis],List];
   rule=rule/.{MyRule[a_?(Head[#]===Symbol&),b_]:>MyRule[a[Scalar],b/Sqrt[2]],MyRule[a_[indx__],b_]:>MyRule[a[indx,Scalar],b/Sqrt[2]]};
   rule=Join[rule/.MyRule[a_[indx___,Scalar],_]:>MyRule[a[indx],(a[indx]/.a[]->a/.FR$vevRules/.{a[indx]->0,a->0})+a[indx,Scalar]+I a[indx,Pseudoscalar]],rule];
   rule=Join[rule/.MyRule[a_[indx___,Scalar],_]:>MyRule[HC[a[indx]],(a[indx]/.a[]->a/.FR$vevRules/.{a[indx]->0,a->0})+a[indx,Scalar]-I a[indx,Pseudoscalar]],rule];
@@ -531,7 +531,7 @@ RotateScalar[mbasis_,gbasis_,Val_]:=Block[{rule,MyModule},
 
 RotatePseudoscalar[mbasis_,gbasis_,Val_]:=Block[{rule, MyModule},
 (* From mass to gauge basis *)
-  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val.gbasis],List];
+  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val . gbasis],List];
   rule=rule/.MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True && $IndList[#]==={}&):>(fiel-anti[fiel])/(Sqrt[2] I)]]/.
        MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True&)[argus__]:>(fiel[argus]-anti[fiel][argus])/(Sqrt[2] I)]];
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
@@ -540,7 +540,7 @@ RotatePseudoscalar[mbasis_,gbasis_,Val_]:=Block[{rule, MyModule},
   FR$ToGaugeBasis=DeleteDuplicates[Join[FR$ToGaugeBasis,rule]];
 
   (* From gauge to mass basis *)
-  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val].mbasis],List];
+  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val] . mbasis],List];
   rule=rule/.{MyRule[a_?(Head[#]===Symbol&),b_]:>MyRule[a[Pseudoscalar],b/Sqrt[2]],MyRule[a_[indx__],b_]:>MyRule[a[indx,Pseudoscalar],b/Sqrt[2]]};
   rule=Join[rule/.MyRule[a_[indx___,Pseudoscalar],_]:>MyRule[a[indx],(a[indx]/.a[]->a/.FR$vevRules/.{a[indx]->0,a->0})+a[indx,Scalar]+I a[indx,Pseudoscalar]],rule];
   rule=Join[rule/.MyRule[a_[indx___,Pseudoscalar],_]:>MyRule[HC[a[indx]],(a[indx]/.a[]->a/.FR$vevRules/.{a[indx]->0,a->0})+a[indx,Scalar]-I a[indx,Pseudoscalar]],rule];
@@ -573,7 +573,7 @@ RotateFermion[mbasis_,gbasis_,Val_,chir_]:=Block[{rule,rule2,MyModule},
   rule2=(Modulize[#,MyModule]&/@rule2)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule2=rule2/.MyRule->Rule/.MyModule->Module;
   If[Not[And@@(SelfConjugateQ[#]&/@mbasis)], rule2=CreateHCRule[rule2]];  
-  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val.gbasis],List];
+  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val . gbasis],List];
   rule=rule/.MyRule[a_[indx__],b_]:>MyRule[a[indx,chir],b];
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule=rule/.MyRule->Rule/.MyModule->Module;
@@ -582,7 +582,7 @@ RotateFermion[mbasis_,gbasis_,Val_,chir_]:=Block[{rule,rule2,MyModule},
   FR$ToGaugeBasis=DeleteDuplicates[Join[FR$ToGaugeBasis,rule]];
 
   (* From gauge to mass basis *)
-  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val].mbasis],List];
+  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val] . mbasis],List];
   rule=rule/.MyRule[a_,b_]:>MyRule[a,ReplaceAll[b,fiel_?(FieldQ[#]===True&)[argx__]:>PrePutIndices[chir[fiel[argx]]]]];  
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule=rule/.MyRule->Rule/.MyModule->Module;
@@ -601,7 +601,7 @@ RotateFermion4[mbasis_,gbasis_,Val_,chir_]:=Block[{rule,rule2,MyModule},
   rule2=(Modulize[#,MyModule]&/@rule2)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule2=rule2/.MyRule->Rule/.MyModule->Module;
   If[Not[And@@(SelfConjugateQ[#]&/@mbasis)], rule2=CreateHCRule[rule2]];  
-  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val.gbasis],List];
+  rule=Inner[MyRule,Patternize[mbasis],PrePutIndices[Val . gbasis],List];
   rule=rule/.MyRule[a_[indx__],b_]:>MyRule[a[indx,chir],PrePutIndices[chir[b]]/.chir[0]->0];
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule=rule/.MyRule->Rule/.MyModule->Module;
@@ -615,7 +615,7 @@ RotateFermion4[mbasis_,gbasis_,Val_,chir_]:=Block[{rule,rule2,MyModule},
   rule2=(Modulize[#,MyModule]&/@rule2)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule2=rule2/.MyRule->Rule/.MyModule->Module;
   If[Not[And@@(SelfConjugateQ[#]&/@gbasis)], rule2=CreateHCRule[rule2]];  
-  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val].mbasis],List];
+  rule=Inner[MyRule,Patternize[gbasis],PrePutIndices[ConjugateTranspose[Val] . mbasis],List];
   rule=rule/.MyRule[a_[indx__],b_]:>MyRule[a[indx,chir],PrePutIndices[chir[b]]/.chir[0]->0];  
   rule=(Modulize[#,MyModule]&/@rule)/.MyModule[{},expr_]->expr/.MyRule[a_,MyModule[{idx__},res_]]:>RuleDelayed[a,MyModule[{idx},res]];
   rule=rule/.MyRule->Rule/.MyModule->Module;
