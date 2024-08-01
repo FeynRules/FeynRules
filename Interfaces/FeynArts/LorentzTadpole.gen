@@ -1,0 +1,322 @@
+(*
+	LorentzTadpole.gen
+		Generic model file for the Lorentz formalism
+		by A. Denner, H. Eck, O. Hahn, S. Kueblbeck 1995
+		last modified 25 Mar 13 by Thomas Hahn
+
+        add Tadpole vertex compared to Lorentz.gen (C. Degrande, 21-11-2014)
+
+This file defines the generic analytical propagators and couplings.
+The model described herein is the standard generic model of renormalizable
+field theories (11 generic couplings) with 3 additional 2-vertices.
+
+Reference:
+	A. Denner, "Techniques for the calculation of electroweak
+	radiative corrections at the one-loop level and results for
+	W-physics at LEP200", Fortschr. d. Physik 41 (1993) 4
+*)
+
+	(* Kinematic indices are `transported' along a propagator line.
+	   KinematicIndices[X] = {Name} means that the generic field X
+	   will carry an index Index[Name, i] along the line:  
+	   X[ n, {m..}, p, {Index[Name, i]} -> {Index[Name, i + 1]} ] *)
+
+KinematicIndices[ F ] = {};
+KinematicIndices[ V ] = {Lorentz};
+KinematicIndices[ S ] = {};
+KinematicIndices[ SV ] = {Lorentz};
+KinematicIndices[ U ] = {}
+
+$FermionLines = True
+
+P$NonCommuting = F | U
+
+Attributes[ MetricTensor ] = Attributes[ ScalarProduct ] = {Orderless}
+
+
+FourVector/: -FourVector[ mom_, mu___ ] := FourVector[Expand[-mom], mu]
+
+FourVector[ 0, ___ ] = 0
+
+
+SpinorType[j_Integer, ___] := MajoranaSpinor /; SelfConjugate[F[j]]
+
+SpinorType[_Integer, __] = DiracSpinor
+
+
+M$GenericPropagators = {
+
+	(* general fermion propagator: *)
+
+  AnalyticalPropagator[External][ s1 F[j1, mom] ] == 
+    NonCommutative[ SpinorType[j1][-mom, Mass[F[j1]]] ],
+
+	(* Remarks:
+	   Fermionic propagators have (like all others, too) their
+	   momentum flowing from left to right. The fermion flow (for
+	   Dirac fermions: fermion number flow) is from right to left.
+	   If the fermion inside the propagator has no sign (i.e. fermion
+	   number flow is opposite to fermion flow or fermion is self
+	   conjugate) we just use the internal propagator S(-p).
+	   If the fermion has a sign, we have to use the Feynman rule S(p)
+	   according to the Majorana paper. However, this rule is given
+	   for a momentum flowing against the fermion flow so, again, we
+	   end up with S(-p). *)
+
+  AnalyticalPropagator[Internal][ s1 F[j1, mom] ] ==
+    NonCommutative[ DiracSlash[-mom] + Mass[F[j1]] ] *
+      I PropagatorDenominator[mom, Mass[F[j1]]], 
+
+	(* general vector boson propagator: *)
+
+  AnalyticalPropagator[External][ s1 V[j1, mom, {li2}] ] ==
+    PolarizationVector[V[j1], mom, li2],
+
+  AnalyticalPropagator[Internal][ s1 V[j1, mom, {li1} -> {li2}] ] ==
+    -I PropagatorDenominator[mom, Mass[V[j1]]] *
+      (MetricTensor[li1, li2] - (1 - GaugeXi[V[j1]]) *
+         FourVector[mom, li1] FourVector[mom, li2] *
+         PropagatorDenominator[mom, Sqrt[GaugeXi[V[j1]]] Mass[V[j1]]]),
+
+	(* general mixing scalar-vector propagator: *)
+
+  AnalyticalPropagator[Internal][ s1 SV[j1, mom, {li1} -> {li2}] ] == 
+    I Mass[SV[j1]] PropagatorDenominator[mom, Mass[SV[j1]]] *
+      FourVector[mom, If[s1 == 1 || s1 == -2, li1, li2]],
+
+	(* general scalar propagator: *)
+
+  AnalyticalPropagator[External][ s1 S[j1, mom] ] == 1,
+
+  AnalyticalPropagator[Internal][ s1 S[j1, mom] ] ==
+    I PropagatorDenominator[mom, Sqrt[GaugeXi[S[j1]]] Mass[S[j1]]],
+
+	(* general Fadeev-Popov ghost propagator: *)
+
+  AnalyticalPropagator[External][ s1 U[j1, mom] ] == 1,
+
+  AnalyticalPropagator[Internal][ s1 U[j1, mom] ] ==
+    I PropagatorDenominator[mom, Sqrt[GaugeXi[U[j1]]] Mass[U[j1]]]
+}
+
+	(* Definition of the generic couplings.
+	   The couplings must be defined as a Dot product of the (generic)
+	   coupling vector G[+/-][ field1, field2, .. ] and the
+	   kinematical vector Gamma = {Gamma1, Gamma2, ...}.
+	   The kinematical vector must have the following properties:
+	   a) the entries of Gamma must close under permutation of the
+	      fields, i.e. under permutation of the momenta and
+	      kinematical indices. One exception is allowed: if the
+	      elements of Gamma only change their signs under certain
+	      permutations (e.g. Gamma1 = mom1 - mom2), a coupling vector
+	      G[-] can be used.
+	      This leads to the following behaviour during the
+	      construction of the classes couplings: if a permuted
+	      coupling was found and the corresponding permutation doesn't
+	      resolve the coupling vector entry, then the program tries
+	      the negative expression of the corresponding Gamma and
+	      multiplies the coupling with (-1).
+	   b) the entries of the kinematical vector have to be closed
+	      under application of the M$FlippingRules, i.e. fermionic
+	      couplings have to be written such that the flipped couplings
+	      are present in the generic coupling. Again, it is possible
+	      to define flippings that change the sign of Gamma and to
+	      take care for those signs by using a G[-]. *)
+
+M$GenericCouplings = {
+
+
+    (* S: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1] ] ==
+G[1][s1 S[j1]] .{ 1 },
+
+	(* V-V: *)
+
+  AnalyticalCoupling[ s1 V[j1, mom1, {li1}], s2 V[j2, mom2, {li2}] ] ==
+    G[1][s1 V[j1], s2 V[j2]] .
+      { MetricTensor[li1, li2] ScalarProduct[mom1, mom2],
+        MetricTensor[li1, li2],
+        FourVector[mom1, li2] FourVector[mom2, li1] },
+
+	(* S-V: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 V[j2, mom2, {li2}] ] ==
+    G[1][s1 S[j1], s2 V[j2]] .
+      { FourVector[mom1, li2],
+        FourVector[mom2, li2] },
+
+	(* S-S: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 S[j2, mom2] ] ==
+    G[1][s1 S[j1], s2 S[j2]] .
+      { ScalarProduct[mom1, mom2],
+        1 },
+
+	(* U-U: *)
+
+  AnalyticalCoupling[ s1 U[j1, mom1], s2 U[j2, mom2] ] ==
+    G[-1][s1 U[j1], s2 U[j2]] .
+      { ScalarProduct[mom1, mom2],
+        1 },
+
+	(* F-F: *)
+
+  AnalyticalCoupling[ s1 F[j1, mom1], s2 F[j2, mom2] ] ==
+    G[-1][s1 F[j1], s2 F[j2]] .
+      { NonCommutative[DiracSlash[mom1], ChiralityProjector[-1]],
+        NonCommutative[DiracSlash[mom2], ChiralityProjector[+1]],
+        NonCommutative[ChiralityProjector[-1]],
+        NonCommutative[ChiralityProjector[+1]] },
+
+	(* V-V-V-V: *)
+
+  AnalyticalCoupling[ s1 V[j1, mom1, {li1}], s2 V[j2, mom2, {li2}], 
+      s3 V[j3, mom3, {li3}], s4 V[j4, mom4, {li4}] ] ==
+    G[1][s1 V[j1], s2 V[j2], s3 V[j3], s4 V[j4]] .
+      { MetricTensor[li1, li2] MetricTensor[li3, li4],
+        MetricTensor[li1, li3] MetricTensor[li2, li4],
+        MetricTensor[li1, li4] MetricTensor[li3, li2] },
+
+	(* V-V-V: *)
+
+  AnalyticalCoupling[ s1 V[j1, mom1, {li1}], s2 V[j2, mom2, {li2}], 
+      s3 V[j3, mom3, {li3}] ] ==
+    G[-1][s1 V[j1], s2 V[j2], s3 V[j3]] .
+      { MetricTensor[li1, li2] FourVector[mom2 - mom1, li3] +
+          MetricTensor[li2, li3] FourVector[mom3 - mom2, li1] +
+          MetricTensor[li3, li1] FourVector[mom1 - mom3, li2] },
+
+	(* S-S-S-S: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 S[j2, mom2],
+      s3 S[j3, mom3], s4 S[j4, mom4] ] ==
+    G[1][s1 S[j1], s2 S[j2], s3 S[j3], s4 S[j4]] .
+      { 1 },
+
+	(* S-S-S: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 S[j2, mom2], s3 S[j3, mom3] ] ==
+    G[1][s1 S[j1], s2 S[j2], s3 S[j3]] .
+      { 1 },
+
+	(* S-S-V-V: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 S[j2, mom2],
+      s3 V[j3, mom3, {li3}], s4 V[j4, mom4, {li4}] ] ==
+    G[1][s1 S[j1], s2 S[j2], s3 V[j3], s4 V[j4]] .
+      { MetricTensor[li3, li4] },
+
+	(* S-S-V: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 S[j2, mom2],
+      s3 V[j3, mom3, {li3}] ] == 
+    G[-1][s1 S[j1], s2 S[j2], s3 V[j3]] .
+      { FourVector[mom1 - mom2, li3] },
+
+	(* S-V-V: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 V[j2, mom2, {li2}], 
+      s3 V[j3, mom3, {li3}] ] ==
+    G[1][s1 S[j1], s2 V[j2], s3 V[j3]] .
+      { MetricTensor[li2, li3] },
+
+	(* F-F-V: *)
+
+  AnalyticalCoupling[ s1 F[j1, mom1], s2 F[j2, mom2],
+      s3 V[j3, mom3, {li3}] ] ==
+    G[-1][s1 F[j1], s2 F[j2], s3 V[j3]] .
+      { NonCommutative[DiracMatrix[li3], ChiralityProjector[-1]], 
+        NonCommutative[DiracMatrix[li3], ChiralityProjector[+1]] },
+ 
+	(* F-F-S: *)
+
+  AnalyticalCoupling[ s1 F[j1, mom1], s2 F[j2, mom2], s3 S[j3, mom3] ] ==
+    G[1][s1 F[j1], s2 F[j2], s3 S[j3]] . 
+      { NonCommutative[ChiralityProjector[-1]],  
+        NonCommutative[ChiralityProjector[+1]] },
+
+	(* U-U-V: *)
+
+  AnalyticalCoupling[ s1 U[j1, mom1], s2 U[j2, mom2],
+      s3 V[j3, mom3, {li3}] ] ==
+    G[1][s1 U[j1], s2 U[j2], s3 V[j3]] .
+      { FourVector[mom1, li3],
+        FourVector[mom2, li3] },
+
+	(* S-U-U: *)
+
+  AnalyticalCoupling[ s1 S[j1, mom1], s2 U[j2, mom2], s3 U[j3, mom3] ] ==
+    G[1][s1 S[j1], s2 U[j2], s3 U[j3]] .
+      { 1 }
+}
+
+	(* FlippingRules: the flipping rules determines how Dirac
+	   objects change when the order of fermion fields in the
+	   coupling is reversed. In other words, it defines how the
+	   coupling C[F, -F, ...] is derived from C[-F, F, ...].
+	   Of the elements of the Dirac algebra we need to consider
+	   only gamma_mu omega_pm since the others are either
+	   unchanged or not used (sigma_{mu,nu}).
+	   See Denner, Eck, Hahn, Kueblbeck, NPB 387 (1992) 467. *)
+
+M$FlippingRules =
+  NonCommutative[dm:_DiracMatrix | _DiracSlash, ChiralityProjector[pm_]] ->
+    -NonCommutative[dm, ChiralityProjector[-pm]]
+
+	(* TruncationRules: rule for omitting the wave functions of
+	   external Propagators defined in this file. *)
+
+M$TruncationRules = {
+  _PolarizationVector -> 1,
+  _DiracSpinor -> 1,
+  _MajoranaSpinor -> 1 
+}
+
+	(* LastGenericRules: the very last rules that are applied to an
+	   amplitude before it is returned by CreateFeynAmp. *)
+
+M$LastGenericRules = {
+  PolarizationVector[p_, _. mom:FourMomentum[Outgoing, _], li_] :>
+    Conjugate[PolarizationVector][p, mom, li]
+}
+
+
+	(* cosmetics: *)
+
+	(*  left spinor in chain + mom incoming -> \bar v
+	    left spinor in chain + mom outgoing -> \bar u
+	   right spinor in chain + mom incoming -> u
+	   right spinor in chain + mom outgoing -> v *)
+Format[
+  FermionChain[
+    NonCommutative[_[s1_. mom1_, mass1_]],
+    r___,
+    NonCommutative[_[s2_. mom2_, mass2_]]] ] :=
+  Overscript[If[FreeQ[mom1, Incoming], "u", "v"], "_"][mom1, mass1] .
+    r . If[FreeQ[mom2, Outgoing], "u", "v"][mom2, mass2]
+
+Format[ DiracSlash ] = "gs"
+
+Format[ DiracMatrix ] = "ga"
+
+Format[ ChiralityProjector[1] ] = Subscript["om", "+"]
+
+Format[ ChiralityProjector[-1] ] = Subscript["om", "-"]
+
+Format[ GaugeXi[a_] ] := Subscript["xi", a]
+
+Format[ PolarizationVector ] = "ep"
+
+Unprotect[Conjugate];
+Format[ Conjugate[a_] ] = Superscript[a, "*"];
+Protect[Conjugate]
+
+Format[ MetricTensor ] = "g"
+
+Format[ ScalarProduct[a__] ] := Dot[a]
+
+Format[ FourVector[a_, b_] ] := a[b]
+
+Format[ FourVector[a_] ] := a
+
