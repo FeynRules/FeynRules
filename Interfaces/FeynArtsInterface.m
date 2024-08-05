@@ -1,5 +1,8 @@
 (* ::Package:: *)
 
+x
+
+
 (* ::Title:: *)
 (*FeynArts Interface*)
 
@@ -699,6 +702,7 @@ WriteStructure[gen_,struc_]:=Module[{struc2,struc3,sumInd,SI},
 
 	struc2 = struc2/.FV[aa_,bb_Pattern]->FV[aa,  Index[Lorentz, bb]]//.{Times[aa___,Eps[bb___,dd_,cc___],ee___,FV[ff_,dd_],hh___]->Times[aa,Eps[bb,FV[ff],cc],ee,hh]};
 
+(*Print["before switch"];Print[InputForm[struc2]];*)
 	Switch[struc2,
 		1,WriteString[gen,ToString[1]];,
 		-1,WriteString[gen,ToString[-1]];,
@@ -737,8 +741,12 @@ WriteStructure[gen_,struc_]:=Module[{struc2,struc3,sumInd,SI},
 			Do[
 				If[MatchQ[struc2[[ff]],Index[Lorentz,Ext[b_]]],
 				  WriteString[gen,"li"<>ToString[struc2[[ff,2,1]]]],
-				  If[MatchQ[struc2[[ff]],_FV],WriteString[gen,"FourVector[mom"<>ToString[struc2[[ff,1]]]<>"]"],WriteString[gen,ToString[struc2[[ff,2,1]]]]];
-				];
+				  If[MatchQ[struc2[[ff]],_FV],WriteString[gen,"FourVector[mom"<>ToString[struc2[[ff,1]]]<>"]"],
+				    If[MatchQ[struc2[[ff]],Index[Lorentz,xyx_]],WriteString[gen,ToString[struc2[[ff,2,1]]]],
+				      If[MatchQ[struc2[[ff]],_Pattern],WriteString[gen,ToString[struc2[[ff,1]]]], Print[ToString[struc2[[ff]]<>" in structure "<>ToString[struc2]<>" not supported"]]];
+				    ];(*end if matchQ 3*) 
+				  ];(*end if matchQ 2*)
+				];(*end if matchQ 1*)
 				If[ff<4,WriteString[gen,", "]];,{ff,4}];WriteString[gen,"]"];,
 		(*Product of structure*)
 		_Times,(*Summed indices?*)
@@ -757,17 +765,18 @@ WriteStructure[gen_,struc_]:=Module[{struc2,struc3,sumInd,SI},
 		_,Print["Warning : the following lorentz structure or part of the lorentz structure is not writen in the generic file"];
 		Print[FullForm[struc]];
 	 ];
+	 (*Print["after switch"];*)
 ];
       
 (*Generic couplings*)
- WriteString[genfile, "(*     Generic couplings    *)\n"];
- WriteString[genfile, "\n"];
- WriteString[genfile, "M$GenericCouplings = {\n"];
- Do[WriteString[genfile,"\n\t (* "<>structurelistFA[[kk,1]]<>" *)\n\nAnalyticalCoupling["];
+ WriteString[genfile, "(*     Generic couplings    *)\n "];
+ WriteString[genfile, "\n "];
+ WriteString[genfile, "M$GenericCouplings = {\n "];
+ Do[WriteString[genfile,"\n\t (* "<>structurelistFA[[kk,1]]<>" *)\n \n AnalyticalCoupling["];
     Do[
 		WriteString[genfile,"s"<>ToString[ll]<>" "<>StringTake[structurelistFA[[kk,1]],{ll}]<>"[j"<>ToString[ll]<>", mom"<>ToString[ll]];
 		If[StringTake[structurelistFA[[kk,1]],{ll}]=="V",
-			WriteString[genfile,", {li"<>ToString[ll]<>"}]"];,
+		    WriteString[genfile,", {li"<>ToString[ll]<>"}]"];,
 			If[(diracIndOpt&&StringTake[structurelistFA[[kk,1]],{ll}]=="F"),
 				WriteString[genfile,", {di"<>ToString[ll]<>"}]"];,
                   If[StringTake[structurelistFA[[kk,1]],{ll}]=="T",
@@ -780,20 +789,26 @@ WriteStructure[gen_,struc_]:=Module[{struc2,struc3,sumInd,SI},
 		If[ll<StringLength[structurelistFA[[kk,1]]],WriteString[genfile,", "];];,
 		{ll,StringLength[structurelistFA[[kk,1]]]}];
 	If[Not[StringFreeQ[structurelistFA[[kk,1]],"F"]]||Not[FreeQ[structurelistFA[[kk]],Eps]],
-       WriteString[genfile," ] ==\nG[-1]["];,WriteString[genfile," ] ==\nG[+1]["];];
+       WriteString[genfile," ] ==\n G[-1]["];,WriteString[genfile," ] ==\n G[+1]["];];
 	Do[WriteString[genfile,"s"<>ToString[ll]<>" "<>StringTake[structurelistFA[[kk,1]],{ll}]<>"[j"<>ToString[ll]<>"]"];
 		If[ll<StringLength[structurelistFA[[kk,1]]],WriteString[genfile,", "];];,
 		{ll,StringLength[structurelistFA[[kk,1]]]}];
-	WriteString[genfile,"].{"];
+	WriteString[genfile,"] . {"];
 	temp = structurelistFA[[kk,2]];
     Do[WriteStructure[genfile,temp[[ll]]];If[ll<Length[temp],WriteString[genfile,", "]],{ll,Length[temp]}];
-		If[kk<Length[structurelistFA],WriteString[genfile,"},\n"],WriteString[genfile,"}"]];,
+		If[kk<Length[structurelistFA],WriteString[genfile,"},\n "],WriteString[genfile,"}"]];,
     {kk,Length[structurelistFA]}];
-WriteString[genfile, "\n"];
-WriteString[genfile, "}\n"];
-WriteString[genfile, "\n"];
+WriteString[genfile, "\n "];
+WriteString[genfile, "}\n "];
+WriteString[genfile, "\n "];
 
 ];
+
+
+
+
+
+
 
 
 (* ::Subsection::Closed:: *)
@@ -1042,6 +1057,7 @@ WriteFACouplings[outfile_, vertices_] := Block[{},
       Do[WriteString[outfile, "C[ "];
          Do[WriteString[outfile, ToString[vertices[[ll, 1, mm]], InputForm], " , "],
             {mm, Length[vertices[[ll, 1]]] - 1}];
+         (*Print["plings last1"];*)
          WriteString[outfile, ToString[Last[vertices[[ll, 1]]], InputForm]];
          WriteString[outfile, " ] == ", ToString[vertices[[ll, 2]], InputForm], ",\n"];
          WriteString[outfile, "\n"],
@@ -1194,7 +1210,7 @@ FR$FeynArtsInterface = False;
 
       (* Merge vertices together *)
          vertexlistFA = MergeVertices @@ Table[Vertices[kmg],{kmg, defname}];
-(*Print["merge with UV 1"];*)
+         (*Print["merge with UV 1"];*)
          vertexlistFA = MergeVertices [inputvert,vertexlistFA];
 (*Print["merge with UV 2"];*)
          If[LoopOpt,vertexlistFA = KillBil/@vertexlistFA];
@@ -1235,8 +1251,8 @@ FR$FeynArtsInterface = False;
 			I Eps[Index[Lorentz,aa],Index[Lorentz,bb],Index[Lorentz,cc],Index[Lorentz,ind]]FlatDot[dd,Ga[Index[Lorentz,ind]],Ga[5],ee][r,s]];
 
 (*Print["t1"];*)
-        vertexlistFA = Replace[vertexlistFA,{TensDot[aa___,Sig[mu_,nu_],bb___]->I/2 TensDot[aa,Ga[mu].Ga[nu],bb]-I/2TensDot[aa,Ga[mu].Ga[nu],bb],
-                               Sig[mu_,nu_,ss1_,ss2_]->I/2 TensDot[Ga[mu].Ga[nu]][ss1,ss2]-I/2TensDot[Ga[nu].Ga[mu]][ss1,ss2]},\[Infinity],Heads->True];
+        vertexlistFA = Replace[vertexlistFA,{TensDot[aa___,Sig[mu_,nu_],bb___]->I/2 TensDot[aa,Ga[mu] . Ga[nu],bb]-I/2TensDot[aa,Ga[mu] . Ga[nu],bb],
+                               Sig[mu_,nu_,ss1_,ss2_]->I/2 TensDot[Ga[mu] . Ga[nu]][ss1,ss2]-I/2TensDot[Ga[nu] . Ga[mu]][ss1,ss2]},\[Infinity],Heads->True];
         vertexlistFA = Replace[vertexlistFA,TensDot[0][ss1_,ss2_]->0,\[Infinity],Heads->True];
 (*Print["t2"];*)
 
@@ -1258,11 +1274,8 @@ FR$FeynArtsInterface = False;
 (*Print["t3"]; *)
 
         FAIDStructure @@@ vertexlistFA;
-(*Print["t4"];*)
-(*Print[InputForm[structurelistFA]];*)
-
+        
 		structurelistFA = LSymmetrize @@@ structurelistFA;
-(*Print[InputForm[structurelistFA]];*)
 
         If[FR$DoPara, 
 (*Print["y1"];*)
@@ -1377,8 +1390,8 @@ FR$FeynArtsInterface = False;
          WriteKinIndices[genfile,diracIndOpt];
 	     WriteSimpRules[genfile];
          WritePropagators[genfile,diracIndOpt];
-	     WriteGenCouplings[genfile,diracIndOpt];
-	     WriteFlippingRules[genfile,diracIndOpt];
+         WriteGenCouplings[genfile,diracIndOpt];
+         WriteFlippingRules[genfile,diracIndOpt];
          WriteTruncation[genfile];
 	     WriteLast[genfile];
          Close[genfile];
@@ -1454,13 +1467,13 @@ FAIDStructure[vertextype_, FAPartContent_, vertex_, fc_] := Module[{temp,temp2,t
 	DelConst[x_]:=(Times@@Cases[x,_?(Not[FreeQ[#,Spin]&&FreeQ[#,Lorentz]&&FreeQ[#,SP]]&)]);
 
 	Contraction[x_]:= Module[{listI,listP,listR},
-		listI = Union[Cases[x, Index[a_,Except[Ext[__]],___], \[Infinity],Heads->True]];
+		listI = Union[Cases[x, Index[FAIDa_,Except[Ext[__]],___], \[Infinity],Heads->True]];
 		If[Length[listI]>26,Print["Warning : not all the kinematic indices are properly summed"]];
-		listP = Pattern[#,Blank[]]&/@(ToExpression[(*"a"<>ToString[#]*)FromCharacterCode[#+96]]&/@Range[Min[Length[listI],26]]);
-		listR = Table[Rule[listI[[kk]],listP[[kk]]],{kk,Length[listI]}];
+		listP = Pattern[#,Blank[]]&/@(ToExpression[(*"a"<>ToString[#]*)FromCharacterCode[(#+96){1,1}]]&/@Range[Min[Length[listI],26]]);
+		listR = Table[Rule[listI[[kk,2]],listP[[kk]]],{kk,Length[listI]}];
 		x/.listR
 	];(*end module contraction*)
-
+	
 	If[FreeQ[structurelistFA,vertextype],
 		temp = Expand[vertex];
 		If[Head[temp]===Plus,temp=List@@temp;,temp=List[temp];];
@@ -1489,7 +1502,7 @@ FAStructure2[vertextype_, FAPartContent_, vertex_, fc_] := Module[{temp, ReturnC
 	temp = Expand[temp/.{SUNF[Aaa__,Bbb_,Ccc_]SUNT[Ccc_,Iii_,Jjj_]->-I(SUNT[Aaa,Bbb,Iii,Jjj]-SUNT[Bbb,Aaa,Iii,Jjj])}];
 	temp = temp//.{SUNT[Aaa__,Index[Colour,Iii_],Index[Colour,Jjj_]]SUNT[Bbb__,Index[Colour,Jjj_],Index[Colour,Kkk_]]->SUNT[Aaa,Bbb,Index[Colour,Iii],Index[Colour,Kkk]]};
 	temp = Expand[temp];
-
+	
 	ReturnConst[pat_] := Module[{epsind,perm,xx,kk,pos,remain,sign,epscoef,ll,newpat,newsign,res,aa,bb,cc,dd},
                            If[FreeQ[pat,Eps],
                              If[MatchQ[pat,Times[a___,-1,b___]],
@@ -1522,8 +1535,9 @@ If[Length[Cases[temp,yx_?(FreeQ[#,Spin]&&FreeQ[#,Lorentz]&&FreeQ[#,SP]&)*newpat-
                                {res}   
 						   ]
                          ];
-
+                         
 	temp = ReturnConst/@(structurelistFA[[Position[structurelistFA,vertextype][[1,1]],2]]);
+	
 	(*copy & paste from Claude code !!! *)
 	temp = temp //. {HC -> $HCHELAS} //. {$HCHELAS[t_?(TensQ)][ind___] -> $HCHELAS[t[ind]]}; 
     temp = temp //. MR$Definitions;

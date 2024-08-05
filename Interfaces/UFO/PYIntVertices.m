@@ -30,7 +30,7 @@ StrictInner[f_, list1_List, list2_List, g_] := g @@ Table[f[list1[[i]], list2[[i
 PrependToLines[matrix_List, elem_] := ({LorentzObject @@ Prepend[#, elem]})& /@ matrix;
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*PYSplitVertices*)
 
 
@@ -98,6 +98,7 @@ PYSplitVertices[vertices_] := Block[{
        split1 = Table[ParallelSubmit[{iii}, FullSplitL[verts[[iii]]]],{iii, Length[verts]}];
        split1 = Join @@ WaitAll[split1];
       ];
+      
     lorentzstruc = Map[Take[#,{1,1}]&, split1, {2}];
     If[Global`FR$Parallelize === False,
        split2 = FullSplitC[Map[Take[#,{2,2}]&, split1, {2}]],
@@ -137,8 +138,13 @@ PYSplitVertices[vertices_] := Block[{
       Print["    - Optimizing."]];
 
    (* Now we optimize *)
+   Print["step0"];
+   Print[InputForm[verts]];
    verts = MapIndexed[OptimizePYSplitVertices, verts];
+   Print[InputForm[verts]];
+   Print["step1"];
    verts = OptimizeInteractionOrders @@@ verts;
+   Print["step2"];
 
    (* We now build the Lorentz objects and the coupling objects*)
    lorentzstruc = DeleteCases[Flatten[verts], Except[(LorentzObject|CouplingObject)[__]]];
@@ -327,7 +333,9 @@ OptimizePYSplitVertices[splitvertex_, {counter_}] := Block[{svertex = Rest[split
     svertex = {OptimizeIndexName[#1], MapAt[OptimizeIndexName, #2, 2], Map[OptimizeIndexName, #3]}& @@@ svertex;
 
     (* Now we collect structures that are the same, using the helper function *)
+    Print["before gather"];
     svertex = MappedGatherByFirstTwoElements[CollectPYStructures, svertex] /. CouplingObject -> CollectCouplObject /. CollectCouplObject -> CouplingObject;
+    Print["after gather"];
 
     (* Now we open the TensDots *)
     svertex = svertex /. {L$TensDot|C$TensDot -> PYTensDotOpen};

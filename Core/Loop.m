@@ -92,7 +92,7 @@ FieldRenormalization[]:=Block[{MyModule,MyRuleDelayed},
 
   (* Antifields *)
   If[SelfConjugateQ[#]=!=True || (SelfConjugateQ[#]===True && FermionQ[#]===True),
-    antibare=If[FermionQ[#]===True && GhostFieldQ[#]=!=True,bare/.#->HC[#].Ga[0],bare/.#->anti[#]];
+    antibare=If[FermionQ[#]===True && GhostFieldQ[#]=!=True,bare/.#->HC[#] . Ga[0],bare/.#->anti[#]];
     antiren=ren/.{fi_?(FieldQ[#]===True&)[args__]->(anti[fi])[args],fi_?(FieldQ[#]===True&)->anti[fi]}/.{
       FR$deltaZ[args__]->Conjugate[FR$deltaZ[args]],ProjP[a_,b_]->ProjM[b,a],ProjM[a_,b_]->ProjP[b,a]}/.
       Conjugate[FR$deltaZ[{fi_?(AntiFieldQ[#]===True&),gi_?(AntiFieldQ[#]===True&)},rest_List,opt___]]->Conjugate[FR$deltaZ[{anti[fi],anti[gi]},rest,opt]];
@@ -204,14 +204,14 @@ For[vevkk=1,vevkk<=Length[M$vevs],vevkk++,
       Print[Style["Error : Physical fields are not SelfConjugate",Red]];Abort[]];
   ];
   tadrules=Cases[{ExpandIndices[tadrules,FlavorExpand->True]},_?FieldQ,\[Infinity]];
-  Print["tadruels"];
-  Print[InputForm[tadrules]];
   For[vevll=1,vevll<=Length[tadrules],vevll++,
     tadrep=Append[tadrep,tadrules[[vevll]]->tadrules[[vevll]]-FR$CT*FR$deltat[tadrules[[vevll]]]/( Union[
     Cases[M$ClassesDescription,{c___,ClassName->tadrules[[vevll]],b___}:>(Mass/.{c,b})[[1]],2],
     Cases[M$ClassesDescription,{c___,ClassMembers->{xx___,tadrules[[vevll]],yy___},b___}:>(Mass/.{c,b})[[-Length[{yy}]-1,1]],2]][[1]])^2];
   ];
 ];
+Print["end TadpoleRenormalization"];
+Print[InputForm[tadrep]];
 Union[tadrep]
 ];
 
@@ -439,7 +439,7 @@ For[kom=1,kom<=Length[resom],kom++,
     matdZR=matdZR-ConjugateTranspose[matdZR]/.Conjugate[FR$deltaZ[{a_,a_},b__]]->FR$deltaZ[{a,a},b]/.If[FreeQ[matparam,I],Conjugate->Identity,{}];
   ];
   (*deltamixingn from the wf*)
-  matdZ=Simplify[matdZR.resom[[kom,2,3]]/4+resom[[kom,2,3]].matdZL/4];
+  matdZ=Simplify[matdZR . resom[[kom,2,3]]/4+resom[[kom,2,3]] . matdZL/4];
   mixrules=Join[mixrules,Solve[DeleteCases[(#1==#2&)@@@Transpose[{Flatten[matdZ],Flatten[matparam]}],_?(FreeQ[#,FR$delta]&)],DeleteDuplicates[Cases[matparam,_FR$delta,\[Infinity]]]][[1]]];
 ];
 mixrules
@@ -989,6 +989,7 @@ deltaLag = deltaLag/.(Cases[InternalParamList/.Rule->tmpRule,tmpRule[_,0]]/.tmpR
 If[Not[mixonly],
   Print["with the parameters at"<>ToString[SessionTime[]-mytime]];
   If[FR$DoPara, 
+     Print["after param reno para"];
      DistributeDefinitions[massRules,paramreno,InternalParamList,PlusI];
      tmp=Table[tmppara=deltaLag[[itp]];
        ParallelSubmit[{itp,tmppara},(Expand[(#(*//.massRules*)/.paramreno/.InternalParamList),FR$CT]&)[tmppara]],{itp,Length[deltaLag]}];
@@ -997,12 +998,14 @@ If[Not[mixonly],
        ParallelSubmit[{itp,tmppara},(Replace[#,Times[I*a_Plus]:>PlusI@@a,1]&)[tmppara]],{itp,Length[deltaLagp]}];
      deltaLagp=Plus@@WaitAll[tmp];
      tmp=Table[tmppara=deltaLagp[[itp]]/.Dot->RenDot/.RenDot->Dot;
-       ParallelSubmit[{itp,tmppara},(SeriesCoefficient[#,{FR$CT,0,1}]&)[tmppara]],{itp,Length[deltaLagp]}];
+       ParallelSubmit[{itp,tmppara},(Simplify[SeriesCoefficient[#,{FR$CT,0,1}],TimeConstraint->0.1]&)[tmppara]],{itp,Length[deltaLagp]}];
      deltaLagp=Plus@@WaitAll[tmp];
      ,
+     Print[InputForm[deltaLagp]];
      deltaLagp=((Expand[(#(*//.massRules*)/.paramreno/.InternalParamList),FR$CT]&)/@deltaLag)/.FR$CT^n_Integer:>0/;n>1;
+     (*Print["after param reno"];Print[InputForm[deltaLagp]];Print[InputForm[paramreno]];Print[InputForm[InternalParamList]];*)
      deltaLagp=(Replace[#,Times[I*a_Plus]:>PlusI@@a,1]&)/@deltaLagp;
-     deltaLagp=(SeriesCoefficient[#,{FR$CT,0,1}]&)/@(deltaLagp/.Dot->RenDot/.RenDot->Dot);
+     deltaLagp=(Simplify[SeriesCoefficient[#,{FR$CT,0,1}],TimeConstraint->0.1]&)/@(deltaLagp/.Dot->RenDot/.RenDot->Dot);
   ];
   deltaLagp=If[Head[deltaLagp]===Plus,(FR$CT*#&)/@deltaLagp, FR$CT*deltaLagp]/.mixreno;
   ,
@@ -1026,8 +1029,7 @@ If[qcd,deltaLagt=0;lagtmp=0;,
     $Output={OutputStream["stdout",1]};
   Print["new mass spectrum with tadpole at "<>ToString[SessionTime[]-mytime]];
     replist=Flatten[(Dmshift/@massspec[[1,2;;,{1,2}]])];
-Print[InputForm[replist]];Print[InputForm[massspec]];
-    deltaLagp=Expand[(#/.replist&)/@deltaLagp];
+    deltaLagp=Expand[(Simplify[#,TimeConstraint->1]/.replist&)/@deltaLagp];
     deltaLagt = (*Factor[*)Expand[deltaLagt+(deltaLagp/.FR$delta[__]->0)/.InternalParamList2](*]*);
   Print["new mass spectrum with tadpole at "<>ToString[SessionTime[]-mytime]];
   (*uses ee instead of alphaEWM1*)
@@ -1036,7 +1038,6 @@ Print[InputForm[replist]];Print[InputForm[massspec]];
     deltaLagp = deltaLagp/.FR$deltat[_]->0;
   ];
 ];
-
 Print["with the fields at "<>ToString[SessionTime[]-mytime]];
 deltaLag=ComplexExpand[(deltaLag(*//.massRules*))/.{CC[x_][p__]:>CCtmp[x[p]]}/.FieldRenoList,cvar,TargetFunctions->{Conjugate}]/.CCtmp->CC;
 Print["with the fields 2 at "<>ToString[SessionTime[]-mytime]];
@@ -1073,7 +1074,6 @@ Print["tadpole shift a at "<>ToString[SessionTime[]-mytime]];
 Print["tadpole shift b at "<>ToString[SessionTime[]-mytime]];
   lagtmp2=DeleteCases[Expand[deltaLag],_?((Count[#//.{Dot->Times,FR$deltaZ[__]->1,Power[a_,b_Integer]:>Pow@@Table[a,{b}],del[a_,b_]:>Identity[a]},_?FieldQ,\[Infinity]])!=2&)];
   lagtmp2 = DeleteCases[lagtmp2,_?(If[Length[Cases[#,_?FieldQ]]==2,Cases[#,_?FieldQ][[1]]===anti[Cases[#,_?FieldQ][[2]]],True]&)];
-  Print[InputForm[lagtmp2]];
   frtmp=(MomentumReplace[#,1]&)/@MergeVertices[frtmp,If[lagtmp2===0,{},FeynmanRules[lagtmp2,SelectParticles->frtmp[[All,1,All,1]]]]];
   $Output={OutputStream["stdout",1]};
 Print["tadpole shift 2 at "<>ToString[SessionTime[]-mytime]];
@@ -1087,6 +1087,10 @@ Print["tadpole shift 4 at "<>ToString[SessionTime[]-mytime]];
   deltaLag = deltaLag/.FR$deltat[_]->0;
 ];
  Print["tadpole shift done at "<>ToString[SessionTime[]-mytime]];
+Print[InputForm[Coefficient[deltaLag,ghWmbar . ghWm]]];
+Print[InputForm[Coefficient[deltaLagt,ghWmbar . ghWm]]];
+Print[InputForm[Coefficient[deltaLagp,ghWmbar . ghWm]]];
+Print[InputForm[Coefficient[lag4S,ghWmbar . ghWm]]];
 
 
 On[Simplify::time];

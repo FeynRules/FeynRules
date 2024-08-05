@@ -89,7 +89,7 @@ SameLorentzQ[l1_,l2_]:=MatchQ[l1/.{L$Ga->Ga,L$ProjM->ProjM,L$ProjP->ProjP,L$Slas
 FullSplitL[input_] := Block[{FSLtemp,FSLgather},
 FSLtemp = ((assemble/@RoutineL/@(Multpad*(PYVertexList[input]+Addpad)))/.Multpad->1);
 FSLgather=PutTogether/@gatherLikes/@FSLtemp;
-(*Print["before"];*)
+
 If[TimeConstrained[Length[Union[Flatten[FSLgather[[All,All,1]]],SameTest->SameLorentzQ]]<Length[Union[Flatten[FSLtemp[[All,All,1]]],SameTest->SameLorentzQ]],10,True],(*Print["true"];*)FSLgather,(*Print["false"];*)(Drop[#,1]&)/@FSLtemp]
 ];
 FullSplitC[input_] := assemble/@RoutineC/@(Multpad*input)/.Multpad->1

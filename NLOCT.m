@@ -65,7 +65,7 @@ CMSConj[a_]:=Conjugate[a]/;NumericQ[a];
 CMSConj[x_If]:=x;
 
 
-(* ::Subsubtitle::Closed:: *)
+(* ::Subsubtitle:: *)
 (*LCivita*)
 
 
@@ -383,7 +383,7 @@ DTrDist[a___,b_*c_?(FreeQ[#,NonCommutative]&),d___]:=c*DTrDist[a,b,d];
 DTrDist[a___,b_*G[k_][l_][m__][n__],d___]:=G[k][l][m][n]*DTrDist[a,b,d];
 
 
-(* ::Subsubtitle:: *)
+(* ::Subsubtitle::Closed:: *)
 (*Distributive Dirac Trace 2*)
 
 
@@ -413,7 +413,7 @@ DTrDist2[a___,NonCommutative[ChiralityProjector[-1]],NonCommutative[ChiralityPro
 DTrDist2[a___,NonCommutative[ChiralityProjector[pm_]],NonCommutative[ChiralityProjector[pm_]],d___]:=DTrDist2[a,NonCommutative[ChiralityProjector[pm]],d];
 
 
-(* ::Subsubtitle:: *)
+(* ::Subsubtitle::Closed:: *)
 (*Fermion Chain*)
 
 
@@ -606,6 +606,253 @@ DiracOpenChain/:DiracOpenChain[a___][Index[Dirac, i_], Index[Dirac, i_]]:=-FS$4*
 CC2[NonCommutative[ChiralityProjector[pm_]]] :=NonCommutative[ChiralityProjector[pm]];
 CC2[NonCommutative[a:_DiracMatrix|_DiracSlash]] := -NonCommutative[a];
 CC2[a_Mass] := a;
+
+
+(* ::Subsubtitle:: *)
+(*Eps replacement*)
+
+
+(*eps and 3 gamma*)
+Eps3gamrep={FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, ccc_], Index[Lorentz, ddd_], Index[Lorentz, aaa_], Index[Lorentz, bbb_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm1*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ddd_], Index[Lorentz, ccc_], Index[Lorentz, aaa_], Index[Lorentz, bbb_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm2*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ccc_], Index[Lorentz, aaa_], Index[Lorentz, ddd_], Index[Lorentz, bbb_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm3*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ccc_], Index[Lorentz, ddd_], Index[Lorentz, bbb_], Index[Lorentz, aaa_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm4*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  aaa_], Index[Lorentz, ddd_], Index[Lorentz, ccc_], Index[Lorentz, bbb_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm5*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  bbb_], Index[Lorentz, ddd_], Index[Lorentz, aaa_], Index[Lorentz, ccc_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm6*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ccc_], Index[Lorentz, bbb_], Index[Lorentz, aaa_], Index[Lorentz, ddd_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm7*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, ddd_], Index[Lorentz, aaa_], Index[Lorentz, ccc_], Index[Lorentz, bbb_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm8*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ccc_], Index[Lorentz, aaa_], Index[Lorentz, bbb_], Index[Lorentz, ddd_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm9*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, Incoming, aaa_], Index[Lorentz, ccc_], Index[Lorentz, ddd_], Index[Lorentz, bbb_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm10*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ccc_], Index[Lorentz, bbb_], Index[Lorentz, ddd_], Index[Lorentz, aaa_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm11*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, ddd_], Index[Lorentz, aaa_], Index[Lorentz, bbb_], Index[Lorentz, ccc_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm12*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  aaa_], Index[Lorentz, bbb_], Index[Lorentz, ccc_], Index[Lorentz, ddd_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm13*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  bbb_], Index[Lorentz, ccc_], Index[Lorentz, ddd_], Index[Lorentz, aaa_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm14*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, aaa_], Index[Lorentz, bbb_], Index[Lorentz, ddd_], Index[Lorentz, ccc_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm15*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  aaa_], Index[Lorentz, ccc_], Index[Lorentz, bbb_], Index[Lorentz, ddd_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm16*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  aaa_], Index[Lorentz, ddd_], Index[Lorentz, bbb_], Index[Lorentz, ccc_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm17*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  bbb_], Index[Lorentz, aaa_], Index[Lorentz, ccc_], Index[Lorentz, ddd_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm18*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  bbb_], Index[Lorentz, aaa_], Index[Lorentz, ddd_], Index[Lorentz, ccc_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm19*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, bbb_], Index[Lorentz, ccc_], Index[Lorentz, aaa_], Index[Lorentz, ddd_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm20*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, bbb_], Index[Lorentz, ddd_], Index[Lorentz, ccc_], Index[Lorentz, aaa_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm21*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, ddd_], Index[Lorentz, bbb_], Index[Lorentz, aaa_], Index[Lorentz, ccc_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm22*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz, ddd_], Index[Lorentz, bbb_], Index[Lorentz, ccc_], Index[Lorentz, aaa_]]:>
+-NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm23*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, ddd_]]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[Index[Lorentz,  ddd_], Index[Lorentz, ccc_], Index[Lorentz, bbb_], Index[Lorentz, aaa_]]:>
+NLO$Eps3gamsign*mypm*(2I(M$dim-1)(1+NLO$Eps3gam(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]]};
+
+(*eps and 3 gamma with FV*)
+Eps3gamrepFV={FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb_]]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[FV[FourMomentum[Incoming, ddd_]], Index[Lorentz, aaa_], Index[Lorentz, bbb_], Index[Lorentz, ccc_]]:>
+NLO$Eps3gamsignFV*mypm*(2I(M$dim-1)(1+NLO$Eps3gamFV(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracSlash[FourMomentum[Incoming, ddd]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm1*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb_]]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[FV[FourMomentum[Incoming, ddd_]], Index[Lorentz, aaa_], Index[Lorentz, ccc_], Index[Lorentz, bbb_]]:>
+-NLO$Eps3gamsignFV*mypm*(2I(M$dim-1)(1+NLO$Eps3gamFV(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracSlash[FourMomentum[Incoming, ddd]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm2*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb_]]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[FV[FourMomentum[Incoming, ddd_]], Index[Lorentz, bbb_], Index[Lorentz, ccc_], Index[Lorentz, aaa_]]:>
+NLO$Eps3gamsignFV*mypm*(2I(M$dim-1)(1+NLO$Eps3gamFV(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracSlash[FourMomentum[Incoming, ddd]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm3*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb_]]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[FV[FourMomentum[Incoming, ddd_]], Index[Lorentz, bbb_], Index[Lorentz, aaa_], Index[Lorentz, ccc_]]:>
+-NLO$Eps3gamsignFV*mypm*(2I(M$dim-1)(1+NLO$Eps3gamFV(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracSlash[FourMomentum[Incoming, ddd]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm4*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb_]]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[FV[FourMomentum[Incoming, ddd_]], Index[Lorentz, ccc_], Index[Lorentz, aaa_], Index[Lorentz, bbb_]]:>
+NLO$Eps3gamsignFV*mypm*(2I(M$dim-1)(1+NLO$Eps3gamFV(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracSlash[FourMomentum[Incoming, ddd]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]],
+(*perm5*)
+FCh[NonCommutative[SpinorType[mygen1_][myfspec1__]], NonCommutative[DiracMatrix[Index[Lorentz, aaa_]]], 
+NonCommutative[DiracMatrix[Index[Lorentz, bbb_]]], NonCommutative[DiracMatrix[Index[Lorentz, ccc_]]], 
+NonCommutative[ChiralityProjector[mypm_]], NonCommutative[SpinorType[mygen2_][myfsepc2__]]]*
+LCivita[FV[FourMomentum[Incoming, ddd_]], Index[Lorentz, ccc_], Index[Lorentz, bbb_], Index[Lorentz, aaa_]]:>
+-NLO$Eps3gamsignFV*mypm*(2I(M$dim-1)(1+NLO$Eps3gamFV(4-M$dim)))FCh[NonCommutative[SpinorType[mygen1][myfspec1]], 
+NonCommutative[DiracSlash[FourMomentum[Incoming, ddd]]],  NonCommutative[ChiralityProjector[mypm]], 
+NonCommutative[SpinorType[mygen2][myfsepc2]]]}
 
 
 (* ::Subsubtitle:: *)
@@ -830,7 +1077,7 @@ FixAwithTr[x_,neva_]:= Block[{tmp,coef},
        Sequence@@NonCommutative/@(NLO$DiracBasis[[nn,2]]/.Int[xx_]->Int[xx,2]),Sequence@@NonCommutative/@x[[2]]]]/.M$dim->4+FR$Eps,{FR$Eps,0,1}]],
   {nn,1,Length[NLO$DiracBasis]}];
   (*Print[InputForm[coef]];*)
-  (Expand[(Normal[Series[Inverse[NLO$Basis2BasisTr].coef,{FR$Eps,0,1}]]).(NLO$DiracBasis*Table[NLO$EvaA2[neva,kk],{kk,Length[NLO$DiracBasis]}])]/.FR$Eps*NLO$EvaA2[xx__]->FR$Eps*NLO$EvaA[xx]/.NLO$EvaA2[__]->1/.NLO$EvaA[0,_]->1)
+  (Expand[(Normal[Series[Inverse[NLO$Basis2BasisTr] . coef,{FR$Eps,0,1}]]) . (NLO$DiracBasis*Table[NLO$EvaA2[neva,kk],{kk,Length[NLO$DiracBasis]}])]/.FR$Eps*NLO$EvaA2[xx__]->FR$Eps*NLO$EvaA[xx]/.NLO$EvaA2[__]->1/.NLO$EvaA[0,_]->1)
 ];
 
 
@@ -1377,7 +1624,7 @@ res=Flatten[res/.Rule->tRule/.{tRule[FR$deltaZ[{a_,b_},xx__],-Conjugate[FR$delta
 ];
 
 
-(* ::Subtitle:: *)
+(* ::Subtitle::Closed:: *)
 (*R2*)
 
 
@@ -1517,7 +1764,7 @@ GetR2::usage="compute the R2 for a FeynArts amplitude at the generic level"
 
 
 GetR2[amp_,next_,UVfin_]:=Block[{temp,loopmom,nden,den,num,kk,extmom,intmom,lmcoef,DisFC,DisMT,DisDS,DisNC,nlmom,x,y,rl,lr,delta},
-DPrint["In reno and fast"];
+Print["In reno and fast"];
   loopmom=amp[[2,1]];
   den=Cases[amp[[3]],_PropagatorDenominator,\[Infinity]];
   den=Cases[den,_?(Not[FreeQ[#,loopmom]]&),1];
@@ -1532,7 +1779,7 @@ DPrint["In reno and fast"];
     num=R2Tadpoles[num,den[[1,2]]^2,next,UVfin];
     ,
     2,
-    extmom=(Coefficient[#,loopmom]&/@Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a]).Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a]-2loopmom;
+    extmom=(Coefficient[#,loopmom]&/@Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a]) . Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a]-2loopmom;
     delta=SP[extmom,extmom]x*(x-1)+Cases[den,_?(Not[FreeQ[#,extmom]]&)][[1,2]]^2*x+Cases[den,_?(FreeQ[#,extmom]&)][[1,2]]^2*(1-x);
 
     If[FreeQ[num,F],
@@ -1564,7 +1811,7 @@ DPrint["In reno and fast"];
     ,
     3,
     extmom=(Coefficient[#,loopmom]&/@Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a])*Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a]-loopmom;
-    extmom=DeleteCases[extmom,0].{x,y};
+    extmom=DeleteCases[extmom,0] . {x,y};
     If[FreeQ[num,F],
       lmcoef=Cases[num,_?(Not[FreeQ[#,loopmom]]&)];
       If[Length[lmcoef]==3,
@@ -1661,7 +1908,7 @@ GetR2[amp_,next_,UVfin_,evenOnly_,maxDim_,gaugef_]:=Block[{temp,loopmom,nden,den
   den=Cases[amp[[3]],_PropagatorDenominator,\[Infinity]];
   nden=Length[den];
   NLO$DebugCount=0;
-
+Print["In EFT"];
 Print["starting at "<>ToString[SessionTime[]]];
 
   (*assume at most two summed lorentz index in the lorentz structure*)
@@ -1672,7 +1919,7 @@ Print["starting at "<>ToString[SessionTime[]]];
     IndexSum[b___*DiracObject[c___,DiracMatrix[e_],DiracMatrix[a_],d___][Index[Dirac,i_],Index[Dirac,j_]],{a_,1,4},{e_,1,4}]:>
     Module[{lo,lo2},((b*DiracObject[c,DiracMatrix[e],DiracMatrix[a],d][Index[Dirac,i],Index[Dirac,j]])/.{a->Index[Lorentz,lo],e->Index[Lorentz,lo2]})]}];
 
-DPrint["after total expand 0 "<>ToString[SessionTime[]]];DPrint[Length[num]];
+Print["after total expand 0 "<>ToString[SessionTime[]]];Print[Length[num]];
   num=Expand[num/.{FeynAmpDenominator[__]->1}/.DiracObject[a__][Index[Dirac, i_], Index[Dirac, j_]]->DiracOpenChain[a][Index[Dirac, i], Index[Dirac, j]]];
 DPrint["before total expand 1 "<>ToString[SessionTime[]]];
 DPrint["Not free form Dirac"];
@@ -1690,8 +1937,8 @@ Print["after total expand 1 "<>ToString[SessionTime[]]];DPrint[Length[num]];
     extmom2=(Coefficient[#,loopmom]&/@Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a])*Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->a]-loopmom;(*vector of external momenta*)
     noextpos=Position[extmom2,0][[1,1]];
     feynp=Insert[feynpar,(1-Total[feynpar]),noextpos];
-    extmom=extmom2.feynp;(*momentum shift*)
-    delta = -Simplify[Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->SP[a,a]-b^2].feynp-SP[loopmom+extmom,loopmom+extmom]];
+    extmom=extmom2 . feynp;(*momentum shift*)
+    delta = -Simplify[Cases[den,\!\(TraditionalForm\`PropagatorDenominator\)[a_,b_]->SP[a,a]-b^2] . feynp-SP[loopmom+extmom,loopmom+extmom]];
     (*num=num/.loopmom ->loopmom-extmom;*)
 (*DPrint[InputForm[loopmom-extmom]];DPrint[InputForm[delta]];*)
   ];(*end of Switch*)
@@ -1864,6 +2111,10 @@ Print["after tens red "<>ToString[SessionTime[]]];DPrint[Length[num]];
             ME[a_?(Not[FreeQ[#,FourMomentum]]&),b_?(Not[FreeQ[#,FourMomentum]]&)]->SP[a,b],
             ME[Index[Lorentz,b_],a_?(Not[FreeQ[#,FourMomentum]]&)]->FV[a,Index[Lorentz,b]],
             ME[a_?(Not[FreeQ[#,FourMomentum]]&),a_?(Not[FreeQ[#,FourMomentum]]&)]->SP[a,a]};
+            
+  num=num/.Eps3gamrep/.Eps3gamrepFV;
+  Print["LCivita after tens red"];
+  Print[InputForm[Cases[num,_?(Not[FreeQ[#,LCivita]]&&Not[FreeQ[#,FCh]]&&(Count[#,DiracMatrix,\[Infinity]]>2)&)]]];
 
 DPrint["4F handeling "<>ToString[SessionTime[]]];
   If[next>3&&Not[FreeQ[num,FCh[a__]*FCh[b__]]],Print["in 4F"];num = Expand[Expand[Expand[num]/.a_FCh*b_FCh:>Sort4FermionChain[a*b]]/.a_FCh*b_FCh:>EvanescentReduce[a*b]];];
@@ -1936,8 +2187,8 @@ DPrint[InputForm[Cases[num,_?(Not[FreeQ[#,LCivita]]&&Not[FreeQ[#,FCh]]&)]]];
   num = Replace[Expand[num],{a_*FCh[d__, NonCommutative[DiracMatrix[Index[Lorentz, lo_]]],f__]*LCivita[b___, Index[Lorentz, lo_], c___]:>
     a*FCh[d, NonCommutative[DiracMatrix[Index[Lorentz, nloEpsF]]],f]*LCivita[b, Index[Lorentz, nloEpsF], c]/;FreeQ[a,LCivita]},{1}];
 
-DPrint["LCivita after getR2"];
-DPrint[InputForm[Cases[num,_?(Not[FreeQ[#,LCivita]]&&Not[FreeQ[#,FCh]]&)]]];
+Print["LCivita after getR2"];
+Print[InputForm[Cases[num,_?(Not[FreeQ[#,LCivita]]&&Not[FreeQ[#,FCh]]&)]]];
   num=num/.MF->Identity;
   num/.{FCh->FermionChain,FV->FourVector,ME->MetricTensor,SP->ScalarProduct,LCivita->LeviCivita}
 ];(*end of getR2*)
@@ -1967,6 +2218,7 @@ R2atClass[Ampl_,INTopo_,verttype_,lab_,kept_,qcd_,UVfinite_,fg_,evenDonly_,maxD_
   DPrint[InputForm[Ampl]];
   paramp=Not[FAdir===None]&&Length[verttype]>1;
   If[paramp,
+  Print["In paramp true"];
   GetR241amp[myamp_]:=Block[{myres,gratop,gragen,gratmp,gratmp2,grascalar,grafc,grarf,grarl},
   myres=0;
     gratop=myamp[[1,1,2]];
@@ -1975,7 +2227,7 @@ R2atClass[Ampl_,INTopo_,verttype_,lab_,kept_,qcd_,UVfinite_,fg_,evenDonly_,maxD_
         GetR2[myamp,Length[verttype],UVfinite],
         GetR2[myamp,Length[verttype],UVfinite,evenDonly,maxD,fg]];
         If[Not[FreeQ[gratmp,Internal]],Print[Style["Error : loop momentum appear in the result",Red]];Print[InputForm[gratmp]];Print[InputForm[Ampl[[kk]]]]];
-Print["after get R2 "<>ToString[SessionTime[]]];
+Print["after get R2 "<>ToString[SessionTime[]]];Print[InputForm[gratmp]];
 
     If[Not[gratmp===0],
       For[ll=1,ll<=Length[myamp[[4,2]]],ll++,
@@ -2040,6 +2292,7 @@ If[Not[FreeQ[gratmp,_IndexDelta]],DPrint[Style[InputForm[gratmp],Green]];];
        ,{itp,1,Length[Ampl]}];
      res=Plus@@(WaitAll[ptmp]);
   ,
+  Print["In paramp false"];
   For[kk=1,kk<=Length[Ampl],kk++,
 Print["amplitude "<>ToString[kk]<>" at "<>ToString[SessionTime[]]];
     top=Ampl[[kk,1,1,2]];
@@ -2059,6 +2312,7 @@ Print["current vert is not same as prev"];
       notalreadydone=True;NLO$currentvert=verttype;NLO$ampR2={};
    ];
     If[True(*notalreadydone*),
+     Print[fg&&(maxD<=4)];Print["feynman and maxdim"];
       tmp=If[fg&&(maxD<=4),
         GetR2[Ampl[[kk]],Length[verttype],UVfinite],
         GetR2[Ampl[[kk]],Length[verttype],UVfinite,evenDonly,maxD,fg]];
@@ -2216,7 +2470,7 @@ DPrint[MatchQ[Head[intop],FeynmanGraph[a_,Classes\[Equal]b_]]&&Not[OrderedQ[into
 MatchQ[Head[intop],FeynmanGraph[a_,Classes==b_]]&&(Not[OrderedQ[intop[[1;;n,2]],(PartOrder[#1,#2]&)]]||Not[FreeQ[intop[[n+1;;,2]],_T]]));
 
 
-(* ::Subsubtitle::Closed:: *)
+(* ::Subsubtitle:: *)
 (*R2vertlist*)
 
 
@@ -2376,6 +2630,7 @@ DPrint["loop amp"];
     topo=DeleteCases[topo,_?(Count[#,Propagator[Loop[1]],\[Infinity],Heads->True]>MaxProp&)];
     INTopo = InsertFields[topo,genver[[kkpl]]->{},Model->mod,GenericModel->gen,ExcludeParticles->Join[If[genver[[kkpl]]==={S,S,S,S}&&mdim<=4,{U},{}],{}],
                           ExcludeFieldPoints->If[Length[genver[[kkpl]]]>3&&mdim<=4,{FieldPoint[_][S,S,S],FieldPoint[_][S,V,V]},{}]];
+    (*Print[InputForm[INTopo]];*)
     INTopo=DeleteCases[INTopo,_?(InTopClassNotOrderedQ[#,Length[genver[[kkpl]]]]&),{5}];
     INTopo=DeleteCases[INTopo,FeynmanGraph[a__][b__]->Insertions[Classes][],\[Infinity]];
     (*add assumptions for masses*)
@@ -2390,12 +2645,14 @@ DPrint["loop amp"];
       INTopo=DeleteCases[DeleteCases[INTopo,_->Insertions[Classes][],{3}],_->Insertions[Generic][],{1}];
     ];
 
+
     Ampl= CreateFeynAmp[INTopo];
-(*DPrint[InputForm[Ampl]];*)
+(*Print[InputForm[Ampl]];*)
     For[ckt=1,ckt<=Length[Ampl],ckt++,Ampl[[ckt,4,2]]=Ampl[[ckt,4,2]]/.{aa_[bb__?(FreeQ[#,Colour]&),Index[Colour,cc_]]->aa[bb]};(*remove colour index in masses*)];
     Print["Writing amplitude finished after "<>ToString[SessionTime[]-temp]];
     tmp=R2atClass[Ampl,INTopo,genver[[kkpl]],lab,kept,qcd,UVCT,fga,evenD,mdim,qcdorders,FAdirname];
-
+Print["amp after R2atClass"];(*Print[InputForm[tmp]];*)
+    
 (*Print[InputForm[tmp]];*)
     Print["Writing the R2 and UV parts at the class level finished after "<>ToString[SessionTime[]-temp]];
     tmp=R2vertlist[Expand[Expand[Expand[Expand[tmp,_SWF],_PolarizationVector],_FermionChain],_PolarizationTensor]]/.IndexDelta->IndexDel;
