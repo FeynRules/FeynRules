@@ -2551,8 +2551,10 @@ ModelR2[mod_,gen_,lab_,kept_,qcd_,zerom_,assumpt_,UVCT_,comas_,ctpa_,no4SCT_,fga
 vrl,vrl2,momk,indt,vertCTlist,zmsol,Orderl,zmF,pos,check,kct,masslist={},ToParam,kkind,ntopo,vertl,CountC,qcdorders,tadpolerep={},rep2pt,zerom2,lili,kik,nF},
 CountC[x_]:=Count[x,Gluon|Colour,\[Infinity]];
 
+Print[InputForm[CTparam]];
 (*ToParam[x_]:=If[LeafCount[x[[2]]]>200,CTparam=Append[CTparam,DeltaToExp[x[[1]]]->x[[2]]];x[[1]]->DeltaToExp[x[[1]]],x];*)
 ToParam[x_]:=Block[{},CTparam=Append[CTparam,DeltaToExp[x[[1]]]->x[[2]]];x[[1]]->DeltaToExp[x[[1]]]];
+Print["param transfo"];Print[InputForm[CTparam]];
 
 temp=SessionTime[];
   If[gvlist===Automatic,
@@ -2717,7 +2719,7 @@ DPrint["after if"];
           ];
           ,(*not 2 ext*)
           If[Length[genver[[kkpl]]]===1,
-            tmp=(If[FreeQ[tmpCT[[All,1]],#[[1]]],Print["Remove the following tadpole because it cannot be absorded in a tadpole counterterm :"];Print[{#[[1]],#[[3]]}];{#[[1]],#[[2]],0},#]&)/@tmp;
+            tmp=(If[FreeQ[tmpCT[[All,1]],#[[1]]],Print["Remove the following tadpole because it cannot be absorded in a tadpole counterterm :"];Print[InputForm[{#[[1]],#[[3]]}]];{#[[1]],#[[2]],0},#]&)/@tmp;
             tmp = DeleteCases[tmp,{_,0,0}];
             tmp[[1;;,3]]=Normal[Series[tmp[[1;;,3]],{FR$Eps,0,0}]];
             tadpolerep=MergeVertList[Expand[(tmp/.FR$Eps->1/inveps)]/.inveps->0,tmpCT];
@@ -2883,9 +2885,8 @@ If[susy==="OS", Block[{tmpCTsol,mixingfields,renocst,allMLRcst},
   (* Putting everything together *)
   CTSol=Join[CTSol,Flatten[tmpCTsol,1],Flatten[renocst,1]];
 ]];
-(*Print[InputForm[CTSol]];*)
 
-If[ctpa,CTSol=Join[CTSol,zmsol,tadpolerep]; zmsol={};tadpolerep={}; CTSol=ToParam/@CTSol;
+If[ctpa,CTSol=Join[CTSol,zmsol,tadpolerep]; zmsol={};tadpolerep={}; CTSol=ToParam/@CTSol;CTparam=CTparam/.CTSol;
   If[comas,
     CTparam=Join[CTparam,(ToExpression[ToString[#1]<>"CMSConj"]->CMSConj[#2]&)@@@Cases[CTparam,_?(Not[FreeQ[Cases[CTSol,_?(Not[FreeQ[#,FR$deltaZ]]&)][[1;;,2]],#[[1]]]]&)]];
     CTSol=Join[(CMSConj[#1]->ToExpression[ToString[#2]<>"CMSConj"]&)@@@Cases[CTSol,_?(Not[FreeQ[#,FR$deltaZ]]&)],CTSol];
@@ -3032,6 +3033,7 @@ If[NC$cms,NLO$CMS=True;,NLO$CMS=False;];
   WriteString[outfile,"(*CT parameters*)\n"];
   WriteString[outfile,"\n"];
   WriteString[outfile,"FR$CTparam = {\n"];
+  Print[InputForm[CTparam]];
   If[Length[CTparam]>0,
     (WriteString[outfile,ToString[InputForm[#]]<>",\n"]&)/@CTparam[[1;;Length[CTparam]-1]];
     WriteString[outfile,ToString[InputForm[Last[CTparam]]]<>"};\n"];

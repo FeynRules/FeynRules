@@ -445,10 +445,7 @@ WriteUFO[lagrangians___, OptionsPattern[]] := Block[{lags = {lagrangians}, verti
        PY$CTparameters = SwitchFromFAToFRVertexConventions /@ (PY$CTparameters/.Rule->List);
        PY$CTparameters = PY$CTparameters /. Log -> RenormLog (*/. FR$MU -> 1*);
        PY$CTparameters = ProcessNLOParameters[PY$CTparameters];
-Print["testparam1"];       
-Print[InputForm[PY$CTparameters]];
-Print[InputForm[FR$CTList]];
-Print[InputForm[Rule[#,GetDelta[#]]&/@Expand[FR$CTList]]];
+
        vertices=vertices/.PY$CTparameters//.{Conjugate[aa_Plus]:>Conjugate/@aa,Conjugate[aa_Times]:>Conjugate/@aa}/.Conjugate[xx_IPL]:>xx;
 
        PY$UVLoopVertices=PY$UVLoopVertices/.PY$CTparameters//.{Conjugate[aa_Plus]:>Conjugate/@aa,Conjugate[aa_Times]:>Conjugate/@aa}/.Conjugate[xx_IPL]:>xx;

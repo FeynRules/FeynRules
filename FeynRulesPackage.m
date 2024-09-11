@@ -1633,7 +1633,7 @@ FormFactor::Vertex = "Warning: Form factor `1` appears in more than one vertex."
 FormFactor::VertexParticles = "Warning: Form factor `1` appears inside a vertex which does not match its Particle option.";
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*NLO*)
 
 
@@ -1643,6 +1643,10 @@ NLO::Failed = "Failed to construct Laurent expansion.";
 NLO::ExtMass = "Error : Not all the masses are external parameters.";
 
 NLO::OnShellMixing = "Error : OnshellMixing should be a classname of physical fields, a list of mixing physical fields or a list of those two types of elements.";
+
+NLO::CTparamsplit = "Error : CT parameter not splitted correctly according to the coupling order and particles in the loop";
+
+NLO::CTparamOrder = "Error : CT parameter not ordered correctly according their order of apperance in other CTparamters";
 
 
 (* ::Section:: *)

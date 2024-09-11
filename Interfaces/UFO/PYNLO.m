@@ -361,10 +361,35 @@ ProcessNLOVertices[R2verts_List, R2coupls_List, UVverts_List, UVcoupls_List, UVL
 CreateRC[name_,loop_List]:=Symbol[StringJoin[ToString[name],"x",ToString/@loop]];
 
 
-ProcessNLOParameters[prms_List] := Block[{},FR$CTList={}; ProcessCTParam/@prms];
+CreateIC[name_,int_Times]:=Symbol[StringJoin[ToString[name],"c",ToString/@List@@(int/.Power[a_,b_]:>ToString[a]<>ToString[b])]];
+CreateIC[name_,int_Power]:=Symbol[StringJoin[ToString[name],"c",(int/.Power[a_,b_]:>ToString[a]<>ToString[b])]];
+CreateIC[name_,int_]:=Symbol[StringJoin[ToString[name],"c",ToString[int]]]/;FreeQ[int,Times]&&FreeQ[int,Plus]&&FreeQ[int,Power];
 
 
-ProcessCTParam[myparam_]:=Block[{name,value,LI},
+ProcessNLOParameters[prms_List] := Block[{newprms={},oprms},
+FR$CTList={}; 
+oprms=OrderParam[prms];
+For[PNPi=1,PNPi<=Length[prms],PNPi++,newprms=Append[newprms,ProcessCTParam[oprms[[PNPi]]/.newprms]]];
+newprms];
+
+
+(*order element such that they are only used in the following elements replacement*)
+OrderParam[paraml_]:=Block[{newpl,posi,posr},
+newpl=paraml;
+For[OPi=1,OPi<=Length[newpl],OPi++,
+	posr=Position[newpl[[1;;,2]],paraml[[OPi,1]]];
+	posi=Position[newpl[[1;;,1]],paraml[[OPi,1]]][[1,1]];
+	If[Length[posr]>0&&posr[[1,1]]<posi,
+	  newpl=Insert[newpl,newpl[[posi]],posr[[1,1]]];
+	  newpl=Delete[newpl,posi+1];
+	];
+];
+If[Union[(Position[newpl,#[[1]]][[1,2]]&)/@newpl]!={1},Message[NLO::CTparamOrder];];
+newpl
+]
+
+
+ProcessCTParam[myparam_]:=Block[{name,value,LI,intvalue,intname,intnamepole,test},
   If[FreeQ[myparam,IPL], Return[myparam]];
   name=myparam[[1]];
   LI=DeleteDuplicates[Cases[Expand[myparam[[2]]],_IPL,Infinity]];
@@ -373,28 +398,66 @@ ProcessCTParam[myparam_]:=Block[{name,value,LI},
     myipl=Simplify[#/factor];
     myname=myipl/.IPL[loop_]:>CreateRC[name,loop];
     If[FreeQ[factor,FR$Eps],
-      GetDelta[myname]=factor;
-      FR$CTList=Append[FR$CTList,myname];
-      GetIntOrder[myname]=GetIntOrder[factor];
-      myname*myipl,
+      test=ExpandAll[factor];
+      If[Head[test]=!=Plus,test={test},test=List@@ExpandAll[factor]];
+      If[test==={0},0,
+        intvalue=Plus@@@GatherBy[test,GetIntOrder];
+        intvalue = ({#,GetIntOrder[#]}&)/@intvalue;
+        intname = (CreateIC[myname,#]&)/@intvalue[[1;;,2]];
+        For[PCTPi=1,PCTPi<=Length[intname],PCTPi++,
+          GetDelta[intname[[PCTPi]]]=intvalue[[PCTPi,1]];
+          GetIntOrder[intname[[PCTPi]]]=intvalue[[PCTPi,2]];
+        ];
+        FR$CTList=Join[FR$CTList,intname];
+        (Plus@@intname)myipl]
+      ,(*with eps*)
       mynamepole=ToExpression[ToString[myname]<>"eps"];
+      test=ExpandAll[Coefficient[factor,FR$Eps,-1]];
+      If[Head[test]=!=Plus,test={test},test=List@@test];
+      If[test==={0},intnamepole=0,
+        intvalue=Plus@@@GatherBy[test,GetIntOrder];
+        intvalue = ({#,GetIntOrder[#]}&)/@intvalue;
+        intnamepole = (CreateIC[mynamepole,#]&)/@intvalue[[1;;,2]];
+        For[PCTPi=1,PCTPi<=Length[intnamepole],PCTPi++,
+          GetDelta[intnamepole[[PCTPi]]]=intvalue[[PCTPi,1]];
+          GetIntOrder[intnamepole[[PCTPi]]]=intvalue[[PCTPi,2]];
+        ];
+        FR$CTList=Join[FR$CTList,intnamepole];
+      ];
       mynamefin=myname;
-      GetDelta[mynamefin]=Coefficient[factor,FR$Eps,0];
-      FR$CTList=Append[FR$CTList,mynamefin];
-      GetIntOrder[mynamefin]=GetIntOrder[Coefficient[factor,FR$Eps,0]];
-      GetDelta[mynamepole]=Coefficient[factor,FR$Eps,-1];
-      FR$CTList=Append[FR$CTList,mynamepole];
-      GetIntOrder[mynamepole]=GetIntOrder[Coefficient[factor,FR$Eps,-1]];
-      (myname+mynamepole/FR$Eps)*myipl
+      test=ExpandAll[Coefficient[factor,FR$Eps,0]];
+      If[Head[test]=!=Plus,test={test},test=List@@ExpandAll[factor]];
+      If[test==={0},intname=0,
+        intvalue=Plus@@@GatherBy[List@@ExpandAll[Coefficient[factor,FR$Eps,0]],GetIntOrder];
+        intvalue = ({#,GetIntOrder[#]}&)/@intvalue;
+        intname = (CreateIC[mynamefin,#]&)/@intvalue[[1;;,2]];
+        For[PCTPi=1,PCTPi<=Length[intname],PCTPi++,
+          GetDelta[intname[[PCTPi]]]=intvalue[[PCTPi,1]];
+          GetIntOrder[intname[[PCTPi]]]=intvalue[[PCTPi,2]];
+        ];
+        FR$CTList=Join[FR$CTList,intname];
+      ];
+      ((Plus@@intnamepole)/FR$Eps+Plus@@intname)*myipl
     ]
   ]&/@value;
   If[(myparam[[2]]/.IPL[_]->0)=!=0,
-    value=Prepend[value,CreateRC[name,{"cst"}]];
-    GetDelta[CreateRC[name,{"cst"}]]=myparam[[2]]/.IPL[_]->0;
-    FR$CTList=Prepend[FR$CTList,CreateRC[name,{"cst"}]];
-    GetIntOrder[CreateRC[name,{"cst"}]]=GetIntOrder[myparam[[2]]/.IPL[_]->0];
+    test=ExpandAll[myparam[[2]]/.IPL[_]->0];
+    If[Head[test]=!=Plus,test={test},test=List@@ExpandAll[factor]];
+    intvalue=Plus@@@GatherBy[test,GetIntOrder];
+    intvalue = ({#,GetIntOrder[#]}&)/@intvalue;
+    intname = (CreateIC[CreateRC[name,{"cst"}],#]&)/@intvalue[[1;;,2]];
+      For[PCTPi=1,PCTPi<=Length[intname],PCTPi++,
+        GetDelta[intname[[PCTPi]]]=intvalue[[PCTPi,1]];
+        GetIntOrder[intname[[PCTPi]]]=intvalue[[PCTPi,2]];
+      ];
+      FR$CTList=Join[FR$CTList,intname];
+    value=Join[value,intname];
   ];
-  Return[Rule[name,Plus@@value]];
+  test=Simplify[(Expand[(gD/@ExpandAll[Plus@@value]/.gD[Times[ayay__]]:>gD/@ayay/.gD[ayay_IPL]:>ayay/.gD->GetDelta)-myparam[[2]]]),TimeConstraint->1];
+  If[test!=0,  Message[NLO::CTparamsplit];
+  Print[InputForm[test]];];
+  (*Print[gD/@ExpandAll[Plus@@value]/.gD[Times[ayay__]]:>gD/@ayay/.gD[ayay_IPL]:>ayay/.gD->GetIntOrder];*)
+  Return[Rule[name,ExpandAll[Plus@@value]]];
 ];
 
 

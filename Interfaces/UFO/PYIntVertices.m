@@ -138,13 +138,9 @@ PYSplitVertices[vertices_] := Block[{
       Print["    - Optimizing."]];
 
    (* Now we optimize *)
-   Print["step0"];
-   Print[InputForm[verts]];
+   
    verts = MapIndexed[OptimizePYSplitVertices, verts];
-   Print[InputForm[verts]];
-   Print["step1"];
    verts = OptimizeInteractionOrders @@@ verts;
-   Print["step2"];
 
    (* We now build the Lorentz objects and the coupling objects*)
    lorentzstruc = DeleteCases[Flatten[verts], Except[(LorentzObject|CouplingObject)[__]]];
@@ -333,10 +329,8 @@ OptimizePYSplitVertices[splitvertex_, {counter_}] := Block[{svertex = Rest[split
     svertex = {OptimizeIndexName[#1], MapAt[OptimizeIndexName, #2, 2], Map[OptimizeIndexName, #3]}& @@@ svertex;
 
     (* Now we collect structures that are the same, using the helper function *)
-    Print["before gather"];
     svertex = MappedGatherByFirstTwoElements[CollectPYStructures, svertex] /. CouplingObject -> CollectCouplObject /. CollectCouplObject -> CouplingObject;
-    Print["after gather"];
-
+    
     (* Now we open the TensDots *)
     svertex = svertex /. {L$TensDot|C$TensDot -> PYTensDotOpen};
 
