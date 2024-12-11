@@ -1216,8 +1216,15 @@ ME[nu_,mu_] sibar[mu_,a_,b_]^:=sibar[nu,a,b];
 ME[mu_,nu_] del[f_,mu_]^:=del[f,nu];
 ME[nu_,mu_] del[f_,mu_]^:=del[f,nu];
 
-ME[mu_,nu_] ff_[indx___,del[f_,mu_],indy___]^:=ff[indx,del[f,nu],indy];
+(* Bug fix by Sho?: https://github.com/HEPcodes/FeynRules/issues/3  *)
+ME[mu_,nu_] ff_[indx___,del[f_,mu_],indy___]/; FreeQ[{indx, indy}, mu] ^:=ff[indx,del[f,nu],indy];
+ME[nu_,mu_] ff_[indx___,del[f_,mu_],indy___]/; FreeQ[{indx, indy}, mu] ^:=ff[indx,del[f,nu],indy];
+
+(*ME[mu_,nu_] ff_[indx___,del[f_,mu_],indy___]^:=ff[indx,del[f,nu],indy];
 ME[nu_,mu_] ff_[indx___,del[f_,mu_],indy___]^:=ff[indx,del[f,nu],indy];
+*)
+(* END bug fix*)
+
 ME[mu_,nu_]f_?(FieldQ[#]===True&)[indx___,mu_,inds___] ^:=f[indx,nu,inds];
 ME[nu_,mu_]f_?(FieldQ[#]===True&)[indx___,mu_,inds___] ^:=f[indx,nu,inds];
 
