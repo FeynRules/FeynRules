@@ -1366,7 +1366,7 @@ RenameAntiColour[colorstruc_, particles_List] := Block[{
    colstruc = colstruc /. {C$T[a_, Index[Colour, i1_], Index[Colour, i2_]] :> C$T[a, Index[CColour, i1], Index[AntiColour, i2]],
                            C$T6[a_, Index[Sextet, i1_], Index[Sextet, i2_]] :> C$T6[a, Index[SSextet, i1], Index[AntiSextet, i2]],
                            C$K6[Index[Sextet, a_], Index[Colour, b_], Index[Colour, c_]] :> C$K6[Index[SSextet, a], Index[AntiColour, b], Index[AntiColour, c]],
-                           C$K6bar[Index[Sextet, a_], Index[Colour, b_], Index[Colour, c_]] :> C$K6[Index[AntiSextet, a], Index[CColour, b], Index[CColour, c]]
+                           C$K6bar[Index[Sextet, a_], Index[Colour, b_], Index[Colour, c_]] :> C$K6bar[Index[AntiSextet, a], Index[CColour, b], Index[CColour, c]]
                            };
 
 
