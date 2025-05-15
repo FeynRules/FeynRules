@@ -17,7 +17,7 @@ FieldRenormalization[field_[inds__]]:=RenField[field,{inds}];
 FieldRenormalization[field_]:=RenField[field,{}];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Core function: returns a renormalized field from a bare field*)
 
 
@@ -67,7 +67,7 @@ RenField[field_,inds__List]:=Block[{rfield=field,NewIndices,FreeIndices, ColorIn
 result];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Derive all the renormalized fields and antifields*)
 
 
@@ -106,7 +106,7 @@ FieldRenormalization[]:=Block[{MyModule,MyRuleDelayed},
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Parameter renormalization*)
 
 
@@ -132,7 +132,7 @@ RenPrm[param_,inds__List]:=Block[{PrmIndices={}, result},
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Derive all the renormalized parameters*)
 
 
@@ -446,7 +446,7 @@ mixrules
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Perturbative expansion of the renormalization constants*)
 
 
@@ -765,10 +765,12 @@ Dmshift[x_]:=Block[{FR$delta2},If[GhostFieldQ[x[[1]]]||GoldstoneQ[x[[1]]],
 
 AntiField2Field[x_]:=If[AntiFieldQ[x],anti[x],x];
 
-DZmixShift[fr_]:=Module[{xx,fi=AntiField2Field/@fr[[1,All,1]]},
-{FR$deltaZ[fi,{{}}]->FR$deltaZ[fi,{{}}]+xx,FR$deltaZ[Reverse[fi],{{}}]->FR$deltaZ[Reverse[fi],{{}}]-xx}/.Solve[
+DZmixShift[fr_]:=Module[{xx,dzmrep,fi=AntiField2Field/@fr[[1,All,1]]},
+dzmrep=Solve[
   (Coefficient[fr[[2]],SP[2,2],0]/.FR$deltat[__]->0)==(Coefficient[fr[[2]],SP[2,2],0]/.{FR$deltaZ[fi,{{}}]->FR$deltaZ[fi,{{}}]+xx,
-  FR$deltaZ[Reverse[fi],{{}}]->FR$deltaZ[Reverse[fi],{{}}]-xx}),xx][[1]]/.xx->0
+  FR$deltaZ[Reverse[fi],{{}}]->FR$deltaZ[Reverse[fi],{{}}]-xx}),xx];
+If[Length[dzmrep]>0,dzmrep=dzmrep[[1]],dzmrep={}];
+{FR$deltaZ[fi,{{}}]->FR$deltaZ[fi,{{}}]+xx,FR$deltaZ[Reverse[fi],{{}}]->FR$deltaZ[Reverse[fi],{{}}]-xx}/.dzmrep/.xx->0
 ];
 
 
@@ -777,7 +779,7 @@ Options[OnShellRenormalization] = {QCDOnly->False,FlavorMixing->True,Only2Point-
 
 OnShellRenormalization[Lag_,options___]:=Module[{FieldRenoList,ExternalParamList,InternalParamList,internalMasses,massRules={}, deltaLagp,deltaLag,classname, classmembers,
 flavor,fi,paramreno={},FreeM,Patbis,qcd,flm,only2,qcdind,qcdclasses,kk1,extNotMass,extNotMass2,cvar,tmppara,itp,tmp,tmpRule,lkinmass,GetnFlavor,extfla,MassFreeQ,skin,no4S,lag4S,Pow,
-deltaLagt,massspec,replist,InternalParamList2,lagtmp,frtmp,logfile,TestPrm,mixreno={},mixfi,mixonly,assum,mytime,lagtmp2},
+deltaLagt,massspec,replist,InternalParamList2,lagtmp,frtmp,logfile,TestPrm,mixreno={},mixfi,mixonly,assum,mytime,lagtmp2,eesol},
 
 mytime=SessionTime[];
 
@@ -791,7 +793,7 @@ mixfi=OnShellMixing/.{options}/.Options[OnShellRenormalization];
 mixonly=MixAndTadOnly/.{options}/.Options[OnShellRenormalization];
 assum=Assumptions/.{options}/.Options[OnShellRenormalization];
 
-Print[flm];
+(*Print[flm];*)
 
 logfile=OpenWrite[];
 
@@ -998,20 +1000,20 @@ If[Not[mixonly],
        ParallelSubmit[{itp,tmppara},(Replace[#,Times[I*a_Plus]:>PlusI@@a,1]&)[tmppara]],{itp,Length[deltaLagp]}];
      deltaLagp=Plus@@WaitAll[tmp];
      tmp=Table[tmppara=deltaLagp[[itp]]/.Dot->RenDot/.RenDot->Dot;
-       ParallelSubmit[{itp,tmppara},(Simplify[SeriesCoefficient[#,{FR$CT,0,1}],TimeConstraint->0.1]&)[tmppara]],{itp,Length[deltaLagp]}];
+       ParallelSubmit[{itp,tmppara},(Simplify[Coefficient[Normal[Series[#,{FR$CT,0,1}]],FR$CT],TimeConstraint->0.1]&)[tmppara]],{itp,Length[deltaLagp]}];
      deltaLagp=Plus@@WaitAll[tmp];
      ,
-     Print[InputForm[deltaLagp]];
      deltaLagp=((Expand[(#(*//.massRules*)/.paramreno/.InternalParamList),FR$CT]&)/@deltaLag)/.FR$CT^n_Integer:>0/;n>1;
      (*Print["after param reno"];Print[InputForm[deltaLagp]];Print[InputForm[paramreno]];Print[InputForm[InternalParamList]];*)
      deltaLagp=(Replace[#,Times[I*a_Plus]:>PlusI@@a,1]&)/@deltaLagp;
-     deltaLagp=(Simplify[SeriesCoefficient[#,{FR$CT,0,1}],TimeConstraint->0.1]&)/@(deltaLagp/.Dot->RenDot/.RenDot->Dot);
+     deltaLagp=(Simplify[Coefficient[Normal[Series[#,{FR$CT,0,1}]],FR$CT],TimeConstraint->0.1]&)/@(deltaLagp/.Dot->RenDot/.RenDot->Dot);
   ];
   deltaLagp=If[Head[deltaLagp]===Plus,(FR$CT*#&)/@deltaLagp, FR$CT*deltaLagp]/.mixreno;
   ,
   deltaLagp=0;
 ];
 
+Print["MyTest=0"];Print[InputForm[deltaLagp/.FR$delta[__]->0]];
 (*Print[DeleteCases[deltaLagp,_?(FreeQ[#,FR$deltaZ]&)]];*)
 (*Print[InputForm[deltaLagp]];*)
 If[qcd,deltaLagt=0;lagtmp=0;,
@@ -1029,20 +1031,27 @@ If[qcd,deltaLagt=0;lagtmp=0;,
     $Output={OutputStream["stdout",1]};
   Print["new mass spectrum with tadpole at "<>ToString[SessionTime[]-mytime]];
     replist=Flatten[(Dmshift/@massspec[[1,2;;,{1,2}]])];
+    Print["mass shift from tadpole"];Print[InputForm[replist]];
     deltaLagp=Expand[(Simplify[#,TimeConstraint->1]/.replist&)/@deltaLagp];
     deltaLagt = (*Factor[*)Expand[deltaLagt+(deltaLagp/.FR$delta[__]->0)/.InternalParamList2](*]*);
   Print["new mass spectrum with tadpole at "<>ToString[SessionTime[]-mytime]];
   (*uses ee instead of alphaEWM1*)
     If[Not[FreeQ[InternalParamList2[[All,1]],ee]],
-      deltaLagt=deltaLagt/.Solve[Cases[InternalParamList2/.Rule->tmpRule,tmpRule[ee,bb_]->ee==bb][[1]],{aEWM1}][[1]]/.{Sqrt[ee^2]->ee,Power[ee^2,Rational[n_Integer,2]]->ee^n}];
+      eesol=Solve[Cases[InternalParamList2/.Rule->tmpRule,tmpRule[ee,bb_]->ee==bb][[1]],{aEWM1}][[1]];
+      Print["solution for e "];Print[InputForm[eesol]];
+      deltaLagt=deltaLagt/.eesol/.{Sqrt[ee^2]->ee,Power[ee^2,Rational[n_Integer,2]]->ee^n}];
     deltaLagp = deltaLagp/.FR$deltat[_]->0;
   ];
 ];
 Print["with the fields at "<>ToString[SessionTime[]-mytime]];
-deltaLag=ComplexExpand[(deltaLag(*//.massRules*))/.{CC[x_][p__]:>CCtmp[x[p]]}/.FieldRenoList,cvar,TargetFunctions->{Conjugate}]/.CCtmp->CC;
+(*Print["logs"];Print[Position[deltaLag,Log][[1;;10,1]]];Print[InputForm[FieldRenoList]];Print[InputForm[cvar]];Print[InputForm[deltaLag]];*)
+(*old for CMS? deltaLag=ComplexExpand[(deltaLag(*//.massRules*))/.{CC[x_][p__]:>CCtmp[x[p]]}/.FieldRenoList,cvar,TargetFunctions->{Conjugate}]/.CCtmp->CC;*)
+deltaLag=Expand[(deltaLag(*//.massRules*))/.{CC[xx_][p__]:>CCtmp[xx[p]]}/.FieldRenoList]/.CCtmp->CC;
 Print["with the fields 2 at "<>ToString[SessionTime[]-mytime]];
+(*Print["logs"];Print[deltaLag[[Position[deltaLag,Log][[1;;10,1]]]]];*)
 deltaLag=Refine[deltaLag, Assumptions->{FR$CT>0}]/.Dot->RenDot/.RenDot->Dot/.Conjugate[FR$deltaZ[{x_,x_},y___]]->FR$deltaZ[{x,x},y];
 Print["with the fields 3 at "<>ToString[SessionTime[]-mytime]];
+(*Print["logs"];Print[deltaLag[[Position[deltaLag,Log][[1;;10,1]]]]];*)
 (*Double needed for 1/2 and proj*)
 deltaLag=deltaLag/.Dot->RenDot/.RenDot->Dot;
 deltaLag=deltaLag/.{FR$CT^2->0,FR$CT^3->0,FR$CT^4->0};
@@ -1056,8 +1065,9 @@ If[FR$DoPara,
   deltaLag = (Normal[Series[#,{FR$CT,0,1}]]&)/@deltaLag;
 ];
 Print["with the fields 5 at"<>ToString[SessionTime[]-mytime]];
+(*Print["logs"];Print[deltaLag[[Position[deltaLag,Log][[1;;10,1]]]]];*)
 
-
+(*Mixing between fields*)
 If[qcd(*||mixonly*),deltaLag=If[Head[deltaLag]===Plus,Expand/@deltaLag,Expand[deltaLag]],
   Print["tadpole shift at "<>ToString[SessionTime[]-mytime]];
 (*3 because one field in the tadpole*)
@@ -1068,17 +1078,18 @@ If[qcd(*||mixonly*),deltaLag=If[Head[deltaLag]===Plus,Expand/@deltaLag,Expand[de
 Print["tadpole shift x at "<>ToString[SessionTime[]-mytime]];
   (*shift the wave function renormalization constant to absorb the tadpole contribution to the two points vertices*)
   lagtmp = Simplify[Expand[lagtmp//.(*If[mixonly,{},*)InternalParamList2(*]*)],TimeConstraint->1];
-  $Output=logfile;
+  (*$Output=logfile;*)Print[InputForm[lagtmp]];
 Print["tadpole shift a at "<>ToString[SessionTime[]-mytime]];
   frtmp=FeynmanRules[lagtmp];
 Print["tadpole shift b at "<>ToString[SessionTime[]-mytime]];
   lagtmp2=DeleteCases[Expand[deltaLag],_?((Count[#//.{Dot->Times,FR$deltaZ[__]->1,Power[a_,b_Integer]:>Pow@@Table[a,{b}],del[a_,b_]:>Identity[a]},_?FieldQ,\[Infinity]])!=2&)];
-  lagtmp2 = DeleteCases[lagtmp2,_?(If[Length[Cases[#,_?FieldQ]]==2,Cases[#,_?FieldQ][[1]]===anti[Cases[#,_?FieldQ][[2]]],True]&)];
-  frtmp=(MomentumReplace[#,1]&)/@MergeVertices[frtmp,If[lagtmp2===0,{},FeynmanRules[lagtmp2,SelectParticles->frtmp[[All,1,All,1]]]]];
+  lagtmp2 = DeleteCases[lagtmp2,_?(If[Length[Cases[#,_?FieldQ]]==2,Cases[#,_?FieldQ][[1]]===anti[Cases[#,_?FieldQ][[2]]],True]&)]; 
+  frtmp=(MomentumReplace[#,1]&)/@MergeVertices[frtmp,If[lagtmp2===0,{},FeynmanRules[lagtmp2,SelectParticles->frtmp[[All,1,All,1]]]]]; 
   $Output={OutputStream["stdout",1]};
 Print["tadpole shift 2 at "<>ToString[SessionTime[]-mytime]];
   frtmp[[All,2]] = (Coefficient[#,FR$CT,1]&)/@frtmp[[All,2]];
 Print["tadpole shift 3 at "<>ToString[SessionTime[]-mytime]];
+Print[InputForm[frtmp]];Print[InputForm[DZmixShift/@frtmp]];
   frtmp=Flatten[DZmixShift/@frtmp];
 Print["tadpole shift 4 at "<>ToString[SessionTime[]-mytime]];
   deltaLag = Expand[deltaLag/.frtmp];
@@ -1087,10 +1098,10 @@ Print["tadpole shift 4 at "<>ToString[SessionTime[]-mytime]];
   deltaLag = deltaLag/.FR$deltat[_]->0;
 ];
  Print["tadpole shift done at "<>ToString[SessionTime[]-mytime]];
-Print[InputForm[Coefficient[deltaLag,ghWmbar . ghWm]]];
+(*Print[InputForm[Coefficient[deltaLag,ghWmbar . ghWm]]];
 Print[InputForm[Coefficient[deltaLagt,ghWmbar . ghWm]]];
 Print[InputForm[Coefficient[deltaLagp,ghWmbar . ghWm]]];
-Print[InputForm[Coefficient[lag4S,ghWmbar . ghWm]]];
+Print[InputForm[Coefficient[lag4S,ghWmbar . ghWm]]];*)
 
 
 On[Simplify::time];

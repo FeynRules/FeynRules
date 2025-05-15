@@ -10,6 +10,7 @@
 
 GetIntOrder[IPL[__]] := 1;
 GetIntOrder[PYR2UVTag[__]] := 1;
+GetIntOrder[_RenormLog]:=1;
 
 
 (* ::Section:: *)
@@ -389,10 +390,17 @@ newpl
 ]
 
 
+(*take a input a rule such as CTparam_name->CTparam_value and create a rule with subparam split by interaction 
+order, pole or finite and particle in the loop. The loop dependence appears explicitely as subparam*IPL[...], the interaction order
+and the value of subparam can be obtained by the GetIntOrder and GetDelta functions with their name as argument, 
+the FR$Eps dependence is also explicite*)
+
 ProcessCTParam[myparam_]:=Block[{name,value,LI,intvalue,intname,intnamepole,test},
   If[FreeQ[myparam,IPL], Return[myparam]];
+  (*%14Print["in ProcessCTParam"];Print[InputForm[myparam]];*)
   name=myparam[[1]];
   LI=DeleteDuplicates[Cases[Expand[myparam[[2]]],_IPL,Infinity]];
+  If[(myparam[[2]]/.IPL[__]->0)!=0,Print["issue : Ctparam with contribution without IPL"]];
   value=Coefficient[myparam[[2]],#]*# &/@LI;
   value=Block[{factor=#/.IPL[_]->1,myname,mynamefin,myipl,mynamepole},
     myipl=Simplify[#/factor];
@@ -412,10 +420,11 @@ ProcessCTParam[myparam_]:=Block[{name,value,LI,intvalue,intname,intnamepole,test
         (Plus@@intname)myipl]
       ,(*with eps*)
       mynamepole=ToExpression[ToString[myname]<>"eps"];
-      test=ExpandAll[Coefficient[factor,FR$Eps,-1]];
+      test=ExpandAll[Coefficient[factor,FR$Eps,-1]/FR$Eps];
       If[Head[test]=!=Plus,test={test},test=List@@test];
       If[test==={0},intnamepole=0,
         intvalue=Plus@@@GatherBy[test,GetIntOrder];
+        (*%14Print["pole"];Print[InputForm[intvalue]];*)
         intvalue = ({#,GetIntOrder[#]}&)/@intvalue;
         intnamepole = (CreateIC[mynamepole,#]&)/@intvalue[[1;;,2]];
         For[PCTPi=1,PCTPi<=Length[intnamepole],PCTPi++,
@@ -428,7 +437,12 @@ ProcessCTParam[myparam_]:=Block[{name,value,LI,intvalue,intname,intnamepole,test
       test=ExpandAll[Coefficient[factor,FR$Eps,0]];
       If[Head[test]=!=Plus,test={test},test=List@@ExpandAll[factor]];
       If[test==={0},intname=0,
-        intvalue=Plus@@@GatherBy[List@@ExpandAll[Coefficient[factor,FR$Eps,0]],GetIntOrder];
+        intvalue=ExpandAll[Coefficient[factor,FR$Eps,0]];
+        If[Head[intvalue]===Plus,
+          intvalue=Plus@@@GatherBy[List@@intvalue,GetIntOrder];,
+          intvalue=Plus@@@GatherBy[{intvalue},GetIntOrder];
+        ];
+        (*%14Print["fin"];Print[InputForm[intvalue]];*)
         intvalue = ({#,GetIntOrder[#]}&)/@intvalue;
         intname = (CreateIC[mynamefin,#]&)/@intvalue[[1;;,2]];
         For[PCTPi=1,PCTPi<=Length[intname],PCTPi++,
@@ -437,9 +451,10 @@ ProcessCTParam[myparam_]:=Block[{name,value,LI,intvalue,intname,intnamepole,test
         ];
         FR$CTList=Join[FR$CTList,intname];
       ];
-      ((Plus@@intnamepole)/FR$Eps+Plus@@intname)*myipl
+      ((Plus@@intnamepole)+Plus@@intname)*myipl
     ]
   ]&/@value;
+  (*%14Print["value"];Print[InputForm[value]];*)
   If[(myparam[[2]]/.IPL[_]->0)=!=0,
     test=ExpandAll[myparam[[2]]/.IPL[_]->0];
     If[Head[test]=!=Plus,test={test},test=List@@ExpandAll[factor]];
@@ -453,10 +468,11 @@ ProcessCTParam[myparam_]:=Block[{name,value,LI,intvalue,intname,intnamepole,test
       FR$CTList=Join[FR$CTList,intname];
     value=Join[value,intname];
   ];
-  test=Simplify[(Expand[(gD/@ExpandAll[Plus@@value]/.gD[Times[ayay__]]:>gD/@ayay/.gD[ayay_IPL]:>ayay/.gD->GetDelta)-myparam[[2]]]),TimeConstraint->1];
-  If[test!=0,  Message[NLO::CTparamsplit];
-  Print[InputForm[test]];];
+  test=Simplify[(Expand[(gD/@ExpandAll[Plus@@value]/.gD[Times[ayay__]]:>gD/@ayay/.gD[ayay_IPL]:>ayay/.gD[1/FR$Eps]:>1/FR$Eps/.gD->GetDelta)-myparam[[2]]]),TimeConstraint->1];
+  If[test=!=0,  Message[NLO::CTparamsplit];Print[InputForm[test]];];
+  (*%14Print["test checkmyparam"];Print[InputForm[test]];Print[InputForm[value]];Print[(Expand[(gD/@ExpandAll[Plus@@value]/.gD[Times[ayay__]]:>gD/@ayay/.gD[ayay_IPL]:>ayay/.gD[1/FR$Eps]:>1/FR$Eps/.gD->GetDelta)])];
   (*Print[gD/@ExpandAll[Plus@@value]/.gD[Times[ayay__]]:>gD/@ayay/.gD[ayay_IPL]:>ayay/.gD->GetIntOrder];*)
+  Print["next"];Print[InputForm[Evaluate[ExpandAll[Plus@@value]]]];Print[name];*)
   Return[Rule[name,ExpandAll[Plus@@value]]];
 ];
 
