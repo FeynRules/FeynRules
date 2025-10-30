@@ -491,7 +491,7 @@ FACouplingRenaming[favertices_] := Block[{vertListTmp = {}, vertN = 1},
 ];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Index handling*)
 
 
@@ -501,7 +501,7 @@ MakeFAExtIndex[Index[name_, Ext[k__]], fcl_,part_] := Block[{tempk, firstk, indl
       fcltemp = fcltemp //. FA$MemberToClass;
       fcltemp = fcltemp //. FA$ClassToName;
       tempk = StringJoin @@ (ToString /@ {k});
-      firstk = If[Length[{k}] > 1, First[[{k}]], k];
+      firstk = If[Length[{k}] > 1, First[{k}], k];
 	  parttemp=Replace[part[[firstk,1]],-1->1,{1}];
       indlist = $IndList[fcltemp[[firstk]]] //. Index -> Identity;
       output = parttemp[[2,Flatten[Position[indlist, name]][[1]]-(Length[indlist]-Length[parttemp[[2]]])]]
@@ -774,13 +774,13 @@ WriteStructure[gen_,struc_]:=Module[{struc2,struc3,sumInd,SI},
  WriteString[genfile, "M$GenericCouplings = {\n "];
  Do[WriteString[genfile,"\n\t (* "<>structurelistFA[[kk,1]]<>" *)\n \n AnalyticalCoupling["];
     Do[
-		WriteString[genfile,"s"<>ToString[ll]<>" "<>StringTake[structurelistFA[[kk,1]],{ll}]<>"[j"<>ToString[ll]<>", mom"<>ToString[ll]];
-		If[StringTake[structurelistFA[[kk,1]],{ll}]=="V",
-		    WriteString[genfile,", {li"<>ToString[ll]<>"}]"];,
-			If[(diracIndOpt&&StringTake[structurelistFA[[kk,1]],{ll}]=="F"),
-				WriteString[genfile,", {di"<>ToString[ll]<>"}]"];,
-                  If[StringTake[structurelistFA[[kk,1]],{ll}]=="T",
-                    WriteString[genfile,", {li"<>ToString[ll]<>"p1,li"<>ToString[ll]<>"p2}]"];,
+		WriteString[genfile,"s "<>ToString[ll]<>" "<>StringTake[structurelistFA[[kk,1]],{ll}]<>"[j "<>ToString[ll]<>", mom "<>ToString[ll]];
+		If[StringTake[structurelistFA[[kk,1]],{ll}]=="V ",
+		    WriteString[genfile,", {li "<>ToString[ll]<>"}]"];,
+			If[(diracIndOpt&&StringTake[structurelistFA[[kk,1]],{ll}]=="F "),
+				WriteString[genfile,", {di "<>ToString[ll]<>"}]"];,
+                  If[StringTake[structurelistFA[[kk,1]],{ll}]=="T ",
+                    WriteString[genfile,", {li "<>ToString[ll]<>"p1,li "<>ToString[ll]<>"p2}]"];,
 				    WriteString[genfile,"]"];
                   ];
         
@@ -788,9 +788,9 @@ WriteStructure[gen_,struc_]:=Module[{struc2,struc3,sumInd,SI},
 		];
 		If[ll<StringLength[structurelistFA[[kk,1]]],WriteString[genfile,", "];];,
 		{ll,StringLength[structurelistFA[[kk,1]]]}];
-	If[Not[StringFreeQ[structurelistFA[[kk,1]],"F"]]||Not[FreeQ[structurelistFA[[kk]],Eps]],
+	If[Not[StringFreeQ[structurelistFA[[kk,1]],"F "]]||Not[FreeQ[structurelistFA[[kk]],Eps]],
        WriteString[genfile," ] ==\n G[-1]["];,WriteString[genfile," ] ==\n G[+1]["];];
-	Do[WriteString[genfile,"s"<>ToString[ll]<>" "<>StringTake[structurelistFA[[kk,1]],{ll}]<>"[j"<>ToString[ll]<>"]"];
+	Do[WriteString[genfile,"s "<>ToString[ll]<>" "<>StringTake[structurelistFA[[kk,1]],{ll}]<>"[j "<>ToString[ll]<>"]"];
 		If[ll<StringLength[structurelistFA[[kk,1]]],WriteString[genfile,", "];];,
 		{ll,StringLength[structurelistFA[[kk,1]]]}];
 	WriteString[genfile,"] . {"];
@@ -803,6 +803,8 @@ WriteString[genfile, "}\n "];
 WriteString[genfile, "\n "];
 
 ];
+
+
 
 
 
