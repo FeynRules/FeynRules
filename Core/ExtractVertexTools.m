@@ -123,7 +123,10 @@ ToCheckOperatorChain[expr_] := Module[{output,temp},
     If[Not[Head[expr] === Times||Head[expr] === Power], Message[CheckOpChain::Head]; Abort[]];
     output = If[Head[expr]===Times,ToOperatorChain @@ expr,ToOperatorChain[expr]]];
 
-
+(* Bug fix for: https://github.com/FeynRules/FeynRules/issues/5 *)
+FR$ReprotectCommutator = MemberQ[Attributes[Commutator], Protected];
+If[FR$ReprotectCommutator, Unprotect[Commutator]];
+(* Bug fix end *)
 
 (* ::Section:: *)
 (*Commutation relations*)
@@ -139,6 +142,10 @@ Commutator[psi1_, crea[psi2_, inds_, i_]] := KronDelta[psi1, psi2, inds] * uwave
 delCom[Except[_uwave, a_] uwave[psi1_,i__], mu_] := a delCom[uwave[psi1,i], mu];
 delCom[uwave[psi1_,inds___, k_], mu_] := - I FV[k,mu]uwave[psi1,inds,k];
 delCom[0, _] := 0;
+
+(* Bug fix for: https://github.com/FeynRules/FeynRules/issues/5 *)
+If[FR$ReprotectCommutator, Protect[Commutator]];
+(* Bug fix end *)
 
 
 (* ::Section:: *)
