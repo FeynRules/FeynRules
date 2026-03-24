@@ -9,7 +9,7 @@
 (*Version : 1.0  --  March 2024 *)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Load / configure the interface*)
 
 
@@ -274,7 +274,7 @@ PyRATEInterfaceConfiguredQ[] := PyRATEInterfaceEnabledQ[] && ( LoadPyRATEInterfa
 CheckInterfaceConfiguration[] := If[PyRATEInterfaceConfiguredQ[], Return[True], Print[Style["Error: the PyR@TE interface is not properly configured.", Bold, Red]]; LoadPyRATEInterface[Quiet -> False, Detail -> True]; Abort[];];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*PyR@TE path config*)
 
 
@@ -393,7 +393,7 @@ CheckPythonDependencies[exec_] := Block[{dependencyScriptPath, out, logPath, mes
 LoadPyRATEInterface[]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Interacting with PyLie and PyR@TE*)
 
 
@@ -2607,7 +2607,7 @@ GetRealRunningComponents[ggList_, yList_:{}, qList_:{}, tList_:{}, smList_:{}, f
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Writing the model file*)
 
 
@@ -2811,7 +2811,7 @@ WriteFermionMasses[fmList_] := Block[{ret},
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*WriteSubstitutions*)
 
 
@@ -2823,7 +2823,7 @@ WriteSubstitutions[] := Block[{ret},
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*WriteLatex*)
 
 
@@ -2835,7 +2835,7 @@ WriteLatex[tex_] := Block[{ret},
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*WriteMapping*)
 
 
@@ -2894,7 +2894,7 @@ ExprToString[expr_, fieldsIn_:{}] := Block[{s = "", termList, tList, tmp, fields
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*WriteCouplings*)
 
 
@@ -3278,7 +3278,7 @@ class Parameters
 ];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*Define the mass matrices*)
 
 
@@ -3292,7 +3292,7 @@ class Parameters
 CalculatePDGFLR[field_]:=Block[{resu},
 	resu=PartPDG[field];
 	If[Not[FreeQ[resu,PartPDG]], resu=PartPDG[ClassMemberList[field/.fi_[__]:>fi][[field/.fi_[inds1___,a_?NumericQ,inds2___] :>a]]]];
-	If[Not[FreeQ[resu,PartPDG]], Print["Error with the PDG identification ("<>ToString[InputForm[field]]<>"). Please contact the FeynRules authors."]];
+	If[Not[FreeQ[resu,PartPDG]], Print["PYRATEInt: Error with the PDG identification ("<>ToString[InputForm[field]]<>"). Please contact the FeynRules authors."]];
 	Return[resu];
 ];
 
@@ -3564,14 +3564,7 @@ int runAndDiagonalize(double* externals, double* res, double t0, double t1, doub
     // Call the RGE solver
 
     if(step == 0) // Set the step to some default value
-    {
-    	if(t1 > t0){
-        	step = (t1-t0)/15.;
-        }
-        else{
-        	step = (t0-t1)/15.;
-        }
-    }
+      step = std::abs(t1-t0)/15.;
 
     landau = ppsolver(t0, t1, step, initialCouplings, runExternals, "<>nl<>", "<>nl<>", "<>nl<>");
 
