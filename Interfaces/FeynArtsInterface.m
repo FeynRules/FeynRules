@@ -520,7 +520,7 @@ IndexSum[a_*b_,{n_,ninc__}]:=a*IndexSum[b,{n,ninc}]/;FreeQ[a,n]
 
 MakeIndexSum[lisi_List] := MakeIndexSum /@ lisi;
 
-MakeIndexSum[expr_?(Head[#]=!=List &)]:=Block[{tmpexprlist,getindlist,IndexSum1},
+MakeIndexSum[expr_?(Head[#]=!=List &)]:=Block[{tmpexprlist,getindlist,IndexSum1,term,indx},
    tmpexprlist=Expand[expr];
    tmpexprlist=If[Head[tmpexprlist]===Plus,List@@tmpexprlist,{tmpexprlist}];
    getindlist=GetIndices/@tmpexprlist;
@@ -528,8 +528,8 @@ MakeIndexSum[expr_?(Head[#]=!=List &)]:=Block[{tmpexprlist,getindlist,IndexSum1}
    getindlist=getindlist/.Index[name_,k_]:>IndexSum1[1,{k,First[MRIndexRange[Index[name]]],Last[MRIndexRange[Index[name]]]}];
    For[term=1,term<=Length[tmpexprlist],term++,
      If[Length[getindlist[[term]]]>0,getindlist[[term,1,1]]=tmpexprlist[[term]];
-       For[ind=2,ind<=Length[getindlist[[term]]],ind++,
-         getindlist[[term,ind,1]]=getindlist[[term,ind-1]];
+       For[indx=2,indx<=Length[getindlist[[term]]],indx++,
+         getindlist[[term,indx,1]]=getindlist[[term,indx-1]];
        ];
        tmpexprlist[[term]]=Last[getindlist[[term]]];
      ];
@@ -1224,8 +1224,8 @@ FR$FeynArtsInterface = False;
 			ME[Index[Lorentz,cc],Index[Lorentz,bb]]FlatDot[dd,Ga[Index[Lorentz,aa]],ee][r,s]+
 			I Eps[Index[Lorentz,aa],Index[Lorentz,bb],Index[Lorentz,cc],Index[Lorentz,ind]]FlatDot[dd,Ga[Index[Lorentz,ind]],Ga[5],ee][r,s]];
 
-        vertexlistFA = Replace[vertexlistFA,{TensDot[aa___,Sig[mu_,nu_],bb___]->I/2 TensDot[aa,Ga[mu].Ga[nu],bb]-I/2TensDot[aa,Ga[mu].Ga[nu],bb],
-                               Sig[mu_,nu_,ss1_,ss2_]->I/2 TensDot[Ga[mu].Ga[nu]][ss1,ss2]-I/2TensDot[Ga[nu].Ga[mu]][ss1,ss2]},\[Infinity],Heads->True];
+        vertexlistFA = Replace[vertexlistFA,{TensDot[aa___,Sig[mu_,nu_],bb___]->I/2 TensDot[aa,Ga[mu] . Ga[nu],bb]-I/2TensDot[aa,Ga[mu] . Ga[nu],bb],
+                               Sig[mu_,nu_,ss1_,ss2_]->I/2 TensDot[Ga[mu] . Ga[nu]][ss1,ss2]-I/2TensDot[Ga[nu] . Ga[mu]][ss1,ss2]},\[Infinity],Heads->True];
         vertexlistFA = Replace[vertexlistFA,TensDot[0][ss1_,ss2_]->0,\[Infinity],Heads->True];
 
 		vertexlistFA=LorentzContract[vertexlistFA]/.{TensDot[aa__][Index[Spin,ss1_],Index[Spin,ss2_]]->(TensDot[aa,ProjP][Index[Spin,ss1],Index[Spin,ss2]]+
