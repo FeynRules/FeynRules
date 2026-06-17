@@ -1007,6 +1007,7 @@ SolveEqMotionFD::usage="Solve the equations of motion for all auxiliary fields a
 
 FR$FTerms::usage="Stores the solution of the equation of motion for the F auxiliary fields";
 FR$DTerms::usage="Stores the solution of the equation of motion for the D auxiliary fields";
+FR$DEOMs::usage="Stores the equations of motion for the D auxiliary fields";
 
 Ueps::usage="";
 Deps::usage="";

@@ -595,7 +595,7 @@ Tonc[exp_]:=Module[{tmp,rules,swap,savedel},
 tmp];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Expansion of superfields to components*)
 
 
@@ -1592,7 +1592,7 @@ CSFKineticTerms[SFS_String]:=Module[{iSF,IndTypesf, tmp, dum, sf},
 tmp];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Vector superfield kinetic terms*)
 
 
@@ -1644,7 +1644,7 @@ SimplifyLieAlgebra[exp_, GrName_] := Module[{tmp, AdjOper,GrRep,ID,struc,t1,t2},
 OptimizeIndex[t1+t2]/.Index[Type_,a_]->a];
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Get the fields present in an expression*)
 
 
@@ -1717,7 +1717,7 @@ ReorderIndices[exp_?(Head[#]=!=Plus&),{Fstr_,Dstr_},AdjIndex_]:=Module[{tmp,LorI
 
 (* ::Text:: *)
 (*OptimizeIndex [ expression, list ] is a function renaming the indices created in the various modules in order to have more compact expressions at the end of the game (collecting terms with the same structure).*)
-(*The index numering is starting at the value of $OptIndex.*)
+(*The index numbering is starting at the value of $OptIndex.*)
 (*list is a list of temporary parameters which carry indices. *)
 
 
@@ -1902,7 +1902,7 @@ IndexType[param_?(NoTensQ[#]===True&)]:= (Indices/.(MR$ParameterRules[param]))/.
 SolveEqMotionFD[exp_]:=SolveEqMotionF[SolveEqMotionD[exp]];
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*D-terms: SolveEqMotionD[ expression ]*)
 
 
@@ -1910,7 +1910,7 @@ SolveEqMotionFD[exp_]:=SolveEqMotionF[SolveEqMotionD[exp]];
 (*SolveEqMotionD[ expression ] solve the equations of motion for the auxiliary D-fields of the theory*)
 
 
-SolveEqMotionD[exp_] :=Module[{tmp, Der, PowTimes, MakePattern, MyModule, MyRuleDelayed, Modulify},
+SolveEqMotionD[exp_] :=Module[{tmp, Der, PowTimes, MakePattern, MyModule, MyRuleDelayed, Modulify, DTList, solEOMs},
 (* Breaks the powers *)
   tmp=exp/. Power[a_,n_? (IntegerQ[#]&&(#>0)&)] :> PowTimes@@Table[a,{n}];
 
@@ -1927,6 +1927,28 @@ SolveEqMotionD[exp_] :=Module[{tmp, Der, PowTimes, MakePattern, MyModule, MyRule
 (* Function to create a replacement rule *)
     MakePattern[rule_Rule] := MapAt[MapAt[Pattern[#,Blank[]]&, #, 1]&, rule, 1];
 
+(* NEW -> BF on May 4th, 2026 *)
+(* Build the full list of D fields *)
+    DTList = (
+      (SF2Aux[Superfield/.MR$GaugeGroupRules[#]][$IndList[Superfield/.MR$GaugeGroupRules[#]]])/.{dt_[{}]->dt, Index[name_]:>Module[{ii}, ii], List->Sequence} 
+    ) & /@ MR$GaugeGroupList;
+(* Build all D equations of motion *)
+    FR$DEOMs = Table[ 
+      Module[{eom},
+       eom = If[MatchQ[DT,_[__]], Der[exp,DT], D[exp,DT]];
+       If[eom===0, Nothing, {eom==0, DT}]
+      ], {DT,DTList}];
+    DTList=FR$DEOMs[[All,2]]; FR$DEOMs=FR$DEOMs[[All,1]]/.Times[bf___,IndexDelta[a_,b_],af___]:>ReplaceAll[Times[bf,af],a->b];
+(* Solve the coupled system *)
+    solEOMs = If[FR$DEOMs==={}, {}, Flatten[Solve[FR$DEOMs, DTList]]];
+    If[FR$DEOMs=!={} && solEOMs==={}, Print["No coupled D-term solution."]; Abort[]];
+
+(* Turn solution into safe delayed replacement rules *)
+    FR$DTerms = (If[MatchQ[#[[1]],_[__]],MakePattern[#],#]& /@ solEOMs)/.Rule[a_, b_] :> MyRuleDelayed[a, Modulify[Expand[b]]];
+    FR$DTerms = FR$DTerms /. {MyRuleDelayed->RuleDelayed, MyModule->Module};
+      
+(*
+(* OLD *)
 (* Solution of the eq. of motion *)
   FR$DTerms=Flatten@( Module[{DT, res},
   (* Get the auxiliary field with the proper indices *)
@@ -1941,7 +1963,7 @@ SolveEqMotionD[exp_] :=Module[{tmp, Der, PowTimes, MakePattern, MyModule, MyRule
   (* Add the modules *)
     res=res/.Rule[a_,b_]:>MyRuleDelayed[a,Modulify[Expand[b]]]; 
   res/.{MyRuleDelayed->RuleDelayed,MyModule->Module}]&/@MR$GaugeGroupList);
-
+*)
 (* Replace the DTerms by the solution of the eq. of motion *)
 tmp/.FR$DTerms/.PowTimes->Times];
 
