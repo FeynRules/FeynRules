@@ -1324,6 +1324,10 @@ BlockName[id_] := Block[{resu,mmix},
 (* ::Subsection::Closed:: *)
 (*Getting back a matrix symbol*)
 
+(* Bug fix for: https://github.com/FeynRules/FeynRules/issues/3 *)
+FR$ReprotectMatrixSymbol = MemberQ[Attributes[MatrixSymbol], Protected];
+If[FR$ReprotectMatrixSymbol, Unprotect[MatrixSymbol]];
+(* Bug fix end *)
 
 MatrixSymbol[id_,S]:=MatrixSymbol[id,"S"];
 MatrixSymbol[id_,PS]:=MatrixSymbol[id,"PS"];
@@ -1350,6 +1354,10 @@ MatrixSymbol[id_] := Block[{resu},
   If[Type[id]==="F4", Message[MassDiag::GBFLR]; Abort[]];
   Return[MixingMatrix/.FR$MixingRules[Mix[id]]/.MixingMatrix->"No matrix symbol found."];
 ];
+
+(* Bug fix for: https://github.com/FeynRules/FeynRules/issues/3 *)
+If[FR$ReprotectMatrixSymbol, Protect[MatrixSymbol]];
+(* Bug fix end *)
 
 
 (* ::Subsection::Closed:: *)
